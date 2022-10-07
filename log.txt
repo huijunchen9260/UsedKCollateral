@@ -1,0 +1,11 @@
+ [   0%]                 innerloop.f90
+ [  20%]                 innerloop.f90  done.
+ [  20%]           UsedKCollateral.f90
+ [  40%]           UsedKCollateral.f90  done.
+ [  40%]          libUsedKCollateral.a
+ [  60%]          libUsedKCollateral.a  done.
+ [  60%]                      main.f90
+ [  80%]                      main.f90  done.
+ [  80%]               UsedKCollateral
+ [ 100%]               UsedKCollateral  done.
+[100%] Project compiled successfully.

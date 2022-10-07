@@ -1,0 +1,15 @@
+name = "UsedKCollateral"
+version = "0.1.0"
+license = "license"
+author = "huijunchen9260"
+maintainer = "chen.9260@osu.edu"
+copyright = "Copyright 2022, huijunchen9260"
+[build]
+auto-executables = true
+auto-tests = true
+auto-examples = true
+[install]
+library = false
+[dependencies]
+nlopt-f.git = "https://github.com/grimme-lab/nlopt-f"
+ogpf = { git = "https://github.com/kookma/ogpf.git" }
