@@ -6,7 +6,7 @@ module numerics
     private
     public :: rk, ik, OUTPUT_UNIT, INPUT_UNIT, ERROR_UNIT
     ! public :: linspace, logspace, tauchen, gridlookup, gridweight, linear_interpolation, cumsum, rouwenhorst, eye
-    public :: logspace, tauchen, gridlookup, gridweight, linear_interpolation, cumsum, rouwenhorst, eye
+    public :: logspace, tauchen, gridlookup, gridweight, cumsum, rouwenhorst, eye
 
 contains
 
@@ -79,42 +79,6 @@ pure function gridweight(xgrid, gridnum, xval, xindex)
         gridweight = gridweight / (xgrid(xindex + 1_ik) - xgrid(xindex))
     endif
 end function gridweight
-
-! Combination of gridlookup and gridweight
-pure subroutine linear_interpolation(xgrid, gridnum, xval, xindex, xweight)
-    integer(ik) :: gridnum, xindex, ixhigh, ixlow, ixplace
-    real(rk) :: xgrid(gridnum), xval, xweight
-    intent(in) :: xgrid, gridnum, xval
-    intent(out) :: xindex, xweight
-
-    if (xval .le. xgrid(1_ik)) then
-        xindex = 1_ik
-        xweight = 1_rk
-    else if (xval .ge. xgrid(gridnum)) then
-        xindex = gridnum - 1_ik
-        xweight = 0_rk
-    else
-
-        ixhigh = gridnum; ixlow = 1_ik
-
-        do
-            if ((ixhigh	- ixlow).le.1_ik) exit
-
-            ixplace	= (ixhigh +	ixlow)/2_ik
-
-            if (xgrid(ixplace).ge.xval)	then
-                ixhigh = ixplace
-            else
-                ixlow =	ixplace
-            end	if
-        end	do
-
-        xindex = ixplace
-        xweight = (xgrid(xindex+1) - xval) / (xgrid(xindex+1) - xgrid(xindex))
-    end if
-
-end subroutine linear_interpolation
-
 
 ! G. Tauchen (1986) 'Finite State Markov-Chain Approximations to
 ! Univariate and Vector Autoregressions' Economics Leters 20: 177-181

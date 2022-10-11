@@ -1,7 +1,6 @@
 module UsedKCollateral
 
     use iso_Fortran_env, only: rk => real64, ik => int32
-    use ogpf
     use numerics
     use io
     use parameters
@@ -61,20 +60,20 @@ contains
         read (iunit) sol%wtrue
         close (iunit)
 
-        ! open (newunit=iunit, file=resDir // "sol%v.bin", &
-        !   form="unformatted", access="stream", status="old")
-        ! read (iunit) sol%v
-        ! close (iunit)
+        open (newunit=iunit, file=resDir // "sol%v.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%v
+        close (iunit)
 
-        ! open (newunit=iunit, file=resDir // "sol%gvk.bin", &
-        !   form="unformatted", access="stream", status="old")
-        ! read (iunit) sol%gvk
-        ! close (iunit)
+        open (newunit=iunit, file=resDir // "sol%gvk.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%gvk
+        close (iunit)
 
-        ! open (newunit=iunit, file=resDir // "sol%gvb.bin", &
-        !   form="unformatted", access="stream", status="old")
-        ! read (iunit) sol%gvb
-        ! close (iunit)
+        open (newunit=iunit, file=resDir // "sol%gvb.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%gvb
+        close (iunit)
 
     end subroutine loadResult
 
