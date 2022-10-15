@@ -13,3 +13,5 @@ library = false
 [dependencies]
 nlopt-f.git = "https://github.com/grimme-lab/nlopt-f"
 ogpf = { git = "https://github.com/kookma/ogpf.git" }
+finterp = { git="https://github.com/jacobwilliams/finterp.git" }
+pyplot-fortran = { git="https://github.com/jacobwilliams/pyplot-fortran.git" }

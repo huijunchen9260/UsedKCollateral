@@ -5,8 +5,8 @@ module numerics
     implicit none
     private
     public :: rk, ik, OUTPUT_UNIT, INPUT_UNIT, ERROR_UNIT
-    ! public :: linspace, logspace, tauchen, gridlookup, gridweight, linear_interpolation, cumsum, rouwenhorst, eye
-    public :: logspace, tauchen, gridlookup, gridweight, cumsum, rouwenhorst, eye
+    public :: linspace, logspace, tauchen, gridlookup, gridweight, cumsum, rouwenhorst, eye
+    ! public :: logspace, tauchen, gridlookup, gridweight, cumsum, rouwenhorst, eye
 
 contains
 
@@ -51,8 +51,7 @@ pure function gridlookup(xgrid, gridnum, xval)
     intent(in):: gridnum, xgrid, xval
     ixhigh = gridnum; ixlow = 1_ik
 
-    do
-        if ((ixhigh	- ixlow).le.1_ik) exit
+    do while (ixhigh - ixlow > 1_ik)
         ixplace	= (ixhigh +	ixlow)/2_ik
 
         if (xgrid(ixplace).ge.xval)	then
@@ -217,42 +216,63 @@ end subroutine rouwenhorst
 
 ! end subroutine linspace
 
-pure function linspace(lb, ub, gridnum)
-    integer(ik) :: gridnum, j1
-    real(rk), dimension(gridnum) :: linspace
-    real(rk), dimension(gridnum-2_ik) :: y
-    real(rk) :: lb, ub
-    intent(in) :: lb, ub, gridnum
-    do j1 = 1_ik, gridnum - 2_ik, 1_ik
-        y(j1) = dble(j1)
-    end do
+function linspace(lb, ub, gridnum)
+    integer(ik), intent(in) :: gridnum
+    real(rk), intent(in) :: lb, ub
+    real(rk), allocatable :: linspace(:)
 
-    y = ((ub - lb) / (gridnum - 1_ik))*y + lb
+    ! Local variables
+    integer(ik) :: i, ierr
+    real(rk) :: dx
 
-    linspace(1_ik) = lb
-    linspace(2_ik:gridnum-1_ik) = dble(y)
-    linspace(gridnum) = ub
+    if (gridnum <= 1) then
+        write(*, *) 'linspace error: gridnum should > 1'
+        stop
+    endif
+
+    allocate(linspace(gridnum), stat = ierr)
+    if (ierr /= 0) then
+        write(*, *) "linspace error: fatal, allocation failed"
+        stop
+    end if
+
+    dx = (ub - lb) / real((gridnum-1),rk)
+    linspace = [ ( i*dx+lb, i = 0, gridnum-1 ) ]
+
 end function linspace
 
-pure function logspace(lb, ub, gridnum)
-    integer(ik) :: gridnum, j1
-    real(rk), dimension(gridnum) :: logspace
-    real(rk), dimension(gridnum-2_ik) :: y
-    real(rk) :: lb, ub, loglb, logub
-    intent(in) :: lb, ub, gridnum
+function logspace(lb, ub, gridnum)
+
+    integer(ik), intent(in) :: gridnum
+    real(rk), intent(in) :: lb, ub
+    real(rk), allocatable :: logspace(:)
+
+    ! Local variables
+    integer(ik) :: i, ierr
+    real(rk) :: dx, loglb, logub
+    ! integer(ik) :: gridnum, j1
+    ! real(rk), allocatable :: logspace(:)
+    ! ! real(rk), dimension(gridnum-2_ik) :: y
+    ! real(rk) :: lb, ub, loglb, logub
+    ! intent(in) :: lb, ub, gridnum
+
+    if (gridnum <= 1) then
+        write(*, *) 'linspace error: gridnum should > 1'
+        stop
+    endif
+
+    allocate(logspace(gridnum), stat = ierr)
+    if (ierr /= 0) then
+        write(*, *) "linspace error: fatal, allocation failed"
+        stop
+    end if
 
     ! log in base 10
     loglb = dlog(1.0_rk) / dlog(10.0_rk)
     logub = dlog(ub - lb + 1.0_rk) / dlog(10.0_rk)
 
-    do j1 = 1_ik, gridnum - 2_ik, 1_ik
-        y(j1) = dble(j1)
-    end do
-    y = ((logub - loglb) / (gridnum - 1_ik))*y + loglb
-
-    logspace(1_ik) = loglb
-    logspace(2:gridnum-1_ik) = y
-    logspace(gridnum) = logub
+    dx = (logub - loglb) / real((gridnum-1),rk)
+    logspace = [ ( i*dx+loglb, i = 0, gridnum-1 ) ]
 
     logspace = 10.0_rk ** logspace
     logspace = logspace + lb - 1.0_rk

@@ -2,7 +2,6 @@ module parameters
 
     ! use iso_Fortran_env, only: rk => real64, ik => int32
     use numerics
-    use ogpf
     implicit none
 
     ! ------ !
@@ -10,6 +9,7 @@ module parameters
     ! ------ !
     character(len=*), parameter :: resDir = "./results/"
     character(len=*), parameter :: figDir = "./figures/"
+    character(len=*), parameter :: figPyDir = "./pyfile/"
     character(len=1000) :: sep
     character(len=1), parameter :: tab = char(9)
     ! logical, parameter :: drawfig = .true.
@@ -26,19 +26,19 @@ module parameters
     ! --------- !
     ! Tolerance !
     ! --------- !
-    real(rk), parameter :: tol = 1.0D-8           ! D is e in matlab, double precision
-    real(rk), parameter :: wTol = 1.0D-6
-    real(rk), parameter :: vTol = 1.0D-5
-    real(rk), parameter :: minBTol = 1.0D-5
+    real(rk), parameter :: tol = 1.0D-9           ! D is e in matlab, double precision
+    real(rk), parameter :: wTol = 1.0D-7
+    real(rk), parameter :: vTol = 1.0D-7
+    real(rk), parameter :: minBTol = 1.0D-7
     integer(ik), parameter :: maxwiter = 1000_ik
-    integer(ik), parameter :: maxviter = 1000_ik
+    integer(ik), parameter :: maxviter = 200_ik
     integer(ik), parameter :: maxbtildeiter = 1000_ik
 
     ! ----------- !
     ! grid points !
     ! ----------- !
-    integer(ik), parameter :: knum = 500_ik
-    integer(ik), parameter :: bknum = 500_ik
+    integer(ik), parameter :: knum = 350_ik
+    integer(ik), parameter :: bknum = 350_ik
     integer(ik), parameter :: enum = 7_ik
 
     ! ---------- !
@@ -100,10 +100,8 @@ module parameters
         ! real(rk), allocatable :: ewk(:)
         ! real(rk), allocatable :: evbk(:, :)
         ! real(rk), allocatable :: evk(:)
-        real(rk) :: ewbk(bknum, knum)
         real(rk) :: ewk(knum)
         real(rk) :: evbk(bknum, knum)
-        real(rk) :: evk(knum)
     end type
 
 contains
@@ -155,7 +153,7 @@ contains
         allocate(sol%ewdnvec(enum), source=0.0_rk)
         allocate(sol%btilde(knum, enum), source=0.0_rk)
         allocate(sol%gwb(knum, enum), source=0.0_rk)
-        allocate(sol%wtrue(bknum, knum, enum), source=.true.)
+        allocate(sol%wtrue(bknum, knum, enum), source = .false.)
         allocate(sol%v(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvk(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvb(bknum, knum, enum), source=0.0_rk)

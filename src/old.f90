@@ -48,17 +48,23 @@
 
     ! end subroutine kvdn
 
-    ! function kvdnObj(guess, gradient, func_data) result(f)
+
+
+    ! function kvupObj(guess, gradient, func_data) result(f)
     !     real(rk), dimension(:), intent(in) :: guess
     !     real(rk), dimension(:), intent(inout), optional :: gradient
     !     class(*), intent(in), optional :: func_data
     !     type(configurations) :: conf
     !     integer(ik) :: kidx, bkidx
-    !     real(rk) :: f, kw, bkw, evval, kfval, bfval, bkratio
+    !     real(rk) :: f, kw, bkw, kfval, bfval, bkratio
+    !     real(rk) :: Qbuy, xuval, qbval
+    !     real(rk) :: ev00, ev10, ev01, ev11, evval
 
     !     select type(func_data)
     !         type is (configurations)
-    !         conf = func_data
+    !             Qbuy = func_data%Qbuy
+    !             xuval = func_data%xuval
+    !             qbval = func_data%qbval
     !     end select
 
     !     IF (PRESENT(gradient)) THEN
@@ -66,15 +72,28 @@
     !     END IF
 
     !     kfval = guess(1)
-    !     bfval = ( conf%qsell*kfval - conf%xdval ) / conf%qbval
+    !     bfval = ( Qbuy*kfval - xuval ) / qbval
     !     bkratio = bfval / kfval
-    !     call linear_interpolation(kgrid, knum, kfval, kidx, kw)
-    !     call linear_interpolation(bkgrid, bknum, bkratio, bkidx, bkw)
-    !     evval = bkw * ( conf%evbk(kidx, bkidx)*kw + conf%evbk(kidx+1_ik, bkidx)*(1.0_rk - kw) )
-    !     evval = evval + (1.0_rk - bkw) * ( conf%evbk(kidx, bkidx+1_ik)*kw + conf%evbk(kidx+1_ik, bkidx+1_ik)*(1.0_rk - kw) )
+
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !     select type(func_data)
+    !         type is (configurations)
+    !             ev00 = func_data%evbk(bkidx, kidx)
+    !             ev10 = func_data%evbk(bkidx+1_ik, kidx)
+    !             ev01 = func_data%evbk(bkidx, kidx+1_ik)
+    !             ev11 = func_data%evbk(bkidx+1_ik, kidx+1_ik)
+    !     end select
+
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
     !     f = beta*evval
 
-    ! end function kvdnObj
+    ! end function kvupObj
+
 
     ! subroutine kvup(bvupval, kvupval, evupval, conf, kstay, kupmax)
     !     type(configurations), intent(inout) :: conf
@@ -124,17 +143,21 @@
 
     ! end subroutine kvup
 
-    ! function kvupObj(guess, gradient, func_data) result(f)
+    ! function kvdnObj(guess, gradient, func_data) result(f)
     !     real(rk), dimension(:), intent(in) :: guess
     !     real(rk), dimension(:), intent(inout), optional :: gradient
     !     class(*), intent(in), optional :: func_data
     !     type(configurations) :: conf
     !     integer(ik) :: kidx, bkidx
-    !     real(rk) :: f, kw, bkw, evval, kfval, bfval, bkratio
+    !     real(rk) :: f, kw, bkw, kfval, bfval, bkratio
+    !     real(rk) :: qsell, xdval, qbval, fval
+    !     real(rk) :: ev00, ev10, ev01, ev11, evval
 
     !     select type(func_data)
     !         type is (configurations)
-    !         conf = func_data
+    !         qsell = func_data%qsell
+    !         xdval = func_data%xdval
+    !         qbval = func_data%qbval
     !     end select
 
     !     IF (PRESENT(gradient)) THEN
@@ -142,13 +165,122 @@
     !     END IF
 
     !     kfval = guess(1)
-    !     bfval = ( conf%Qbuy*kfval - conf%xuval ) / conf%qbval
+    !     bfval = ( qsell*kfval - xdval ) / qbval
     !     bkratio = bfval / kfval
-    !     call linear_interpolation(kgrid, knum, kfval, kidx, kw)
-    !     call linear_interpolation(bkgrid, bknum, bkratio, bkidx, bkw)
-    !     evval = bkw * ( conf%evbk(kidx, bkidx)*kw + conf%evbk(kidx+1_ik, bkidx)*(1.0_rk - kw) )
-    !     evval = evval + (1.0_rk - bkw) * ( conf%evbk(kidx, bkidx+1_ik)*kw + conf%evbk(kidx+1_ik, bkidx+1_ik)*(1.0_rk - kw) )
+
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !     select type(func_data)
+    !         type is (configurations)
+    !             ev00 = func_data%evbk(bkidx, kidx)
+    !             ev10 = func_data%evbk(bkidx+1_ik, kidx)
+    !             ev01 = func_data%evbk(bkidx, kidx+1_ik)
+    !             ev11 = func_data%evbk(bkidx+1_ik, kidx+1_ik)
+    !     end select
+
+
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
     !     f = beta*evval
 
-    ! end function kvupObj
+    ! end function kvdnObj
 
+
+    ! subroutine kvrule(bvfval, kvfval, vval, bprimemax, bthreshold, kstay, bval, conf)
+    !     type(configurations), intent(inout) :: conf
+    !     integer(ik) :: kidx, bkidx
+    !     real(rk), intent(in) :: bprimemax, bthreshold, kstay, bval
+    !     real(rk), intent(out) :: bvfval, kvfval, vval
+    !     real(rk) :: kupmax, kdnmax, bkratio
+    !     real(rk) :: bvupval, kvupval, evupval, bvdnval, kvdnval, evdnval, bvalsolp
+    !     real(rk) :: kw, bkw, evval, LB, UB
+
+    !     kvupval = 0.0_rk
+    !     kvdnval = 0.0_rk
+
+    !     ! Check for feasibility if using very large zeta.
+    !     if (conf%xdval + conf%qbval*bprimemax < kgrid(1)*conf%qsell) then
+    !         bvalsolp = -kgrid(1)*conf%qsell + conf%xdval + bval + conf%qbval*bprimemax
+    !         kvfval = kgrid(1)
+    !         bvfval = bprimemax
+    !         bkratio = bvfval / kvfval
+
+    !         kidx = gridlookup(kgrid, knum, kvfval)
+    !         kw = gridweight(kgrid, knum, kvfval, kidx)
+    !         bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !         bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !         evval = bkw * ( conf%evbk(bkidx, kidx)*kw + conf%evbk(bkidx, kidx+1_ik)*(1.0_rk - kw) )
+    !         evval = evval + (1.0_rk - bkw) * ( conf%evbk(bkidx+1_rk, kidx)*kw + conf%evbk(bkidx+1_rk, kidx+1_ik)*(1.0_rk - kw) )
+    !         evval = beta*evval
+    !         vval = (1.0_rk - exitprob)*evval + exitprob*conf%pval*conf%xdval
+    !         return
+    !     endif
+
+    !     ! If firm can do upward-adjustment
+    !     if (bval <= bthreshold) then
+    !         kupmax = ( conf%qbval*bprimemax + conf%xuval ) / conf%Qbuy
+
+    !         if (kupmax <= kstay) then
+    !             kvupval = dmin1(kstay, kgrid(1))
+    !             bvupval = ( conf%Qbuy*kvupval - conf%xuval ) / conf%qbval
+    !             bkratio = bvupval / kvupval
+
+    !             kidx = gridlookup(kgrid, knum, kvupval)
+    !             kw = gridweight(kgrid, knum, kvupval, kidx)
+    !             bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !             bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !             evval = bkw * ( conf%evbk(bkidx, kidx)*kw + conf%evbk(bkidx, kidx+1_ik)*(1.0_rk - kw) )
+    !             evval = evval + (1.0_rk - bkw) * ( conf%evbk(bkidx+1_rk, kidx)*kw + conf%evbk(bkidx+1_ik, kidx+1_ik)*(1.0_rk - kw) )
+    !             evupval = beta*evval
+    !         else
+    !             LB = dmax1(kstay, kgrid(1))
+    !             UB = dmin1(kupmax, kgrid(knum))
+    !             call gss(evupval, kvupval, kvupGSSObj, LB = LB, UB = UB, func_data = conf)
+    !             bvupval = ( conf%Qbuy*kvupval - conf%xuval ) / conf%qbval
+    !         endif
+    !     endif
+
+    !     kdnmax = ( conf%qbval*bprimemax + conf%xdval ) / conf%qsell
+    !     if ( dmin1(kdnmax, kstay) <= kgrid(1) ) then
+    !         kvdnval = kgrid(1)
+    !         bvdnval = ( conf%qsell*kvdnval - conf%xdval ) / conf%qbval
+    !         bkratio = bvdnval / kvdnval
+
+    !         kidx = gridlookup(kgrid, knum, kvdnval)
+    !         kw = gridweight(kgrid, knum, kvdnval, kidx)
+    !         bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !         bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !         evval = bkw * ( conf%evbk(bkidx, kidx)*kw + conf%evbk(bkidx, kidx+1_ik)*(1.0_rk - kw) )
+    !         evval = evval + (1.0_rk - bkw) * ( conf%evbk(bkidx+1_ik, kidx)*kw + conf%evbk(bkidx+1_ik, kidx+1_ik)*(1.0_rk - kw) )
+    !         evdnval = beta*evval
+    !     else
+    !         LB = kgrid(1)
+    !         UB = dmin1(kdnmax, kgrid(knum), kstay)
+    !         call gss(evdnval, kvdnval, kvdnGSSObj, LB = LB, UB = UB, func_data = conf)
+    !         bvdnval = ( conf%qsell*kvdnval - conf%xdval ) / conf%qbval
+    !     endif
+
+    !     if (bval > bthreshold) then
+    !         kvfval = kvdnval
+    !         bvfval = bvdnval
+    !         vval = evdnval
+    !     else
+    !         if (evupval >= evdnval) then
+    !             kvfval = kvupval
+    !             bvfval = bvupval
+    !             vval = evupval
+    !         else
+    !             kvfval = kvdnval
+    !             bvfval = bvdnval
+    !             vval = evdnval
+    !         endif
+    !     endif
+
+    !     vval = (1.0_rk - exitprob)*vval + exitprob*conf%pval*conf%xdval
+
+    ! end subroutine kvrule

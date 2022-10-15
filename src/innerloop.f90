@@ -6,6 +6,7 @@ module innerloop
     use optMod
     implicit none
 
+
 contains
 
     subroutine vvalueiter(sol, conf)
@@ -30,10 +31,14 @@ contains
         allocate(tgvk(bknum, knum, enum), source = 0.0_rk)
         allocate(tgvb(bknum, knum, enum), source = 0.0_rk)
 
-        ! allocate(conf%evbk(bknum, knum), source = 0.0_rk)
-
         iter = 0_ik
         dist = 2.0_rk*vTol
+
+        ! --------------- !
+        ! DEBUG
+        ! --------------- !
+        ! iter = maxviter !
+        ! --------------- !
 
         ! ------------------------ !
         ! initial V-value function !
@@ -45,6 +50,7 @@ contains
 
         bkidx0 = gridlookup(bkgrid, bknum, 0.0_rk)
         bkw0 = gridweight(bkgrid, bknum, 0.0_rk, bkidx0)
+
         mainwhile: do while (dist > vTol .and. iter <= maxviter )
 
             ! iter = maxviter
@@ -59,8 +65,6 @@ contains
                     do indbk = 1, bknum, 1
                         ev(indbk, indk, inde) = &
                             dot_product(pie(inde, :), sol%v(indbk, indk, :))
-                        ew(indbk, indk, inde) = &
-                            dot_product(pie(inde, :), sol%w(indbk, indk, :))
                     enddo
                 enddo
             enddo
@@ -73,10 +77,15 @@ contains
             epsloop: do inde = 1, enum, 1
                 epsval = egrid(inde)
                 conf%evbk = ev(:, :, inde)
-                conf%ewk = ew(bkidx0, :, inde)*bkw0 + ew(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
 
+                conf%ewk = ev(bkidx0, :, inde)*bkw0 + ev(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
                 call gss(ewdnstar, kwdnstar, kwdnGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
                 call gss(ewupstar, kwupstar, kwupGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
+
+                ! ewupstar = sol%ewupvec(inde)
+                ! kwupstar = sol%kwupvec(inde)
+                ! ewdnstar = sol%ewdnvec(inde)
+                ! kwdnstar = sol%kwdnvec(inde)
 
                 kloop: do indk = 1, knum, 1
                     kval = kgrid(indk)
@@ -92,8 +101,8 @@ contains
                         conf%xdval = yval - conf%wval*nval - bval + conf%qsell*kstay
                         if (sol%wtrue(indbk, indk, inde)) then
                             call kwrule(wstar, kstar, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
-                            tv(indbk, indk, inde) = wstar - conf%pval * bval
-                            tgvk(indbk, indk, inde) = kstar
+                            tv(indbk, indk, inde) = sol%w(indbk, indk, inde)
+                            tgvk(indbk, indk, inde) = sol%gwk(indk, inde)
                             tgvb(indbk, indk, inde) = sol%gwb(indk, inde)
                         else
                             call kvrule(bvfval, kvfval, vval, bprimemax, bthreshold, kstay, bval, conf)
@@ -129,9 +138,61 @@ contains
                                             minval(sol%gvb), maxval(sol%gvb)
             endif
 
+            ! if (iter == 1 .or. modulo(iter, 10) == 0.0_rk) then
+            !     call gp%preset(.false.)
+            !     call gp%xlabel('k')
+            !     call gp%ylabel('gvk')
+            !     call gp%title('bond decision rule for constrained firm')
+            !     call gp%options('set key outside')
+            !     call gp%plot( &
+            !         kgrid, &
+            !         reshape( (/&
+            !             sol%gvb(bknum-15, :, 1), &
+            !             sol%gvb(bknum-15, :, 3), &
+            !             sol%gvb(bknum-15, :, 5), &
+            !             sol%gvb(bknum-15, :, 7),&
+            !             sol%gvb(bknum-10, :, 1), &
+            !             sol%gvb(bknum-10, :, 3), &
+            !             sol%gvb(bknum-10, :, 5), &
+            !             sol%gvb(bknum-10, :, 7),&
+            !             sol%gvb(bknum, :, 1), &
+            !             sol%gvb(bknum, :, 3), &
+            !             sol%gvb(bknum, :, 5), &
+            !             sol%gvb(bknum, :, 7)&
+            !             /), &
+            !             (/knum, 12/) ), &
+            !         lspec =' &
+            !                 title "bk = ' // num2str(bkgrid(1), strfmt) // &
+            !                     'e = ' // num2str(egrid(1), strfmt) // '" ls 1; &
+            !                 title "bk = ' // num2str(bkgrid(1), strfmt) // &
+            !                     'e = ' // num2str(egrid(3), strfmt) // '" ls 2; &
+            !                 title "bk = ' // num2str(bkgrid(1), strfmt) // &
+            !                     'e = ' // num2str(egrid(5), strfmt) // '" ls 3; &
+            !                 title "bk = ' // num2str(bkgrid(1), strfmt) // &
+            !                     'e = ' // num2str(egrid(7), strfmt) // '" ls 4; &
+            !                 title "bk = ' // num2str(bkgrid(bknum/2), strfmt) // &
+            !                     'e = ' // num2str(egrid(1), strfmt) // '" ls 5; &
+            !                 title "bk = ' // num2str(bkgrid(bknum/2), strfmt) // &
+            !                     'e = ' // num2str(egrid(3), strfmt) // '" ls 6; &
+            !                 title "bk = ' // num2str(bkgrid(bknum/2), strfmt) // &
+            !                     'e = ' // num2str(egrid(5), strfmt) // '" ls 7; &
+            !                 title "bk = ' // num2str(bkgrid(bknum/2), strfmt) // &
+            !                     'e = ' // num2str(egrid(7), strfmt) // '" ls 8; &
+            !                 title "bk = ' // num2str(bkgrid(bknum), strfmt) // &
+            !                     'e = ' // num2str(egrid(1), strfmt) // '" ls 9; &
+            !                 title "bk = ' // num2str(bkgrid(bknum), strfmt) // &
+            !                     'e = ' // num2str(egrid(3), strfmt) // '" ls 10; &
+            !                 title "bk = ' // num2str(bkgrid(bknum), strfmt) // &
+            !                     'e = ' // num2str(egrid(5), strfmt) // '" ls 11; &
+            !                 title "bk = ' // num2str(bkgrid(bknum), strfmt) // &
+            !                     'e = ' // num2str(egrid(7), strfmt) // '" ls 12 &
+            !         ')
+            !     call gp%reset() ! use reset to be able to save next figure to pdf
+            !     read(INPUT_UNIT, *)
+            ! endif
+
+
         enddo mainwhile
-
-
 
     end subroutine vvalueiter
 
@@ -233,9 +294,9 @@ contains
                 kval = kgrid(indk)
                 do indbk = 1, bknum, 1
                     bval = kval * bkgrid(indbk)
-                    if (sol%btilde(indk, inde) >= bval) then
-                        ! wtrue is in default .true.
-                        sol%wtrue(indbk, indk, inde) = .false.
+                    if (sol%btilde(indk, inde) - bval >= 0.0_rk) then
+                        ! wtrue is .false. by default
+                        sol%wtrue(indbk, indk, inde) = .true.
                     endif
                 enddo
             enddo
@@ -246,6 +307,7 @@ contains
     subroutine wvalueiter(sol, conf)
         type(solutions), intent(inout) :: sol
         type(configurations), intent(inout) :: conf
+        type(linear_interp_1d) :: bkzero
         integer(ik) :: indk, inde, indef, indbk
         integer(ik) :: iter
         integer(ik) :: bkidx0
@@ -277,7 +339,7 @@ contains
             ! conditional expectation !
             ! ----------------------- !
 
-            !$omp parallel do collapse(3) private(inde, indk, indbk)
+            ! !$omp parallel do collapse(3) private(inde, indk, indbk)
             do inde = 1, enum, 1
                 do indk = 1, knum, 1
                     do indbk = 1, bknum, 1
@@ -286,7 +348,7 @@ contains
                     enddo
                 enddo
             enddo
-            !$omp end parallel do
+            ! !$omp end parallel do
 
             ! ------------------------------- !
             ! solve efficient unit of capital !
