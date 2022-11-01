@@ -4,7 +4,8 @@ module UsedKCollateral
     use numerics
     use io
     use parameters
-    use innerloop
+    use firmValueIter
+    use firmDistribution
     implicit none
 
 contains
@@ -75,6 +76,16 @@ contains
         read (iunit) sol%gvb
         close (iunit)
 
+        open (newunit=iunit, file=resDir // "sol%muw.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%muw
+        close (iunit)
+
+        open (newunit=iunit, file=resDir // "sol%muv.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%muv
+        close (iunit)
+
     end subroutine loadResult
 
     subroutine saveResult(sol)
@@ -106,6 +117,8 @@ contains
         write (iunit, integerFormat) knum
         write (iunit, integerFormat) bknum
         write (iunit, integerFormat) enum
+        write (iunit, integerFormat) muknum
+        write (iunit, integerFormat) mubknum
         ! TODO fill out later!
         close(iunit)
 
@@ -171,6 +184,16 @@ contains
         open (newunit=iunit, file=resDir // "sol%gvb.bin", &
           form="unformatted", access="stream", status="unknown")
         write (iunit) sol%gvb
+        close (iunit)
+
+        open (newunit=iunit, file=resDir // "sol%muw.bin", &
+          form="unformatted", access="stream", status="unknown")
+        write (iunit) sol%muw
+        close (iunit)
+
+        open (newunit=iunit, file=resDir // "sol%muv.bin", &
+          form="unformatted", access="stream", status="unknown")
+        write (iunit) sol%muv
         close (iunit)
 
     end subroutine saveResult

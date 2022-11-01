@@ -1,4 +1,306 @@
 
+
+    ! subroutine kvdn(bvdnval, kvdnval, evdnval, conf, kstay, kdnmax)
+    !     type(configurations), intent(inout) :: conf
+    !     real(rk), intent(in) :: kstay, kdnmax
+    !     real(rk), intent(out) :: bvdnval, kvdnval, evdnval
+    !     real(rk) :: UB, LB
+    !     real(rk) :: fmax, bkratio, kw, bkw, evval
+    !     integer :: stat
+    !     integer(ik) :: kidx, bkidx
+    !     real(rk) :: ev00, ev01, ev10, ev11
+
+    !     integer(ik) :: iter
+    !     real(rk) :: a, b, c, d, z, fval, fc, fd, gssTol, gssDist
+    !     real(rk) :: kfval, bfval
+    !     real(rk) :: goldenRatio
+
+    !     goldenRatio = (3.0_rk - dsqrt(5.0_rk)) / 2.0_rk
+
+    !     if ( dmin1(kdnmax, kstay) <= kgrid(1) ) then
+    !         kvdnval = kgrid(1)
+    !         bvdnval = ( conf%qsell*kvdnval - conf%xdval ) / conf%qbval
+    !         bkratio = bvdnval / kvdnval
+
+    !         kfval = kvdnval
+    !         kidx = gridlookup(kgrid, knum, kfval)
+    !         kw = gridweight(kgrid, knum, kfval, kidx)
+    !         bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !         bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !         ev00 = conf%evbk(bkidx, kidx)
+    !         ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !         ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !         ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+
+    !         evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !         evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !         evdnval = beta*evval
+    !         return
+    !     endif
+
+
+    !     LB = kgrid(1)
+    !     UB = dmin1(kdnmax, kgrid(knum), kstay)
+
+    !     iter = 0_ik
+    !     gssTol = 1D-9
+    !     gssDist = 2.0_rk*gssTol
+
+    !     a = LB
+    !     b = UB
+    !     c = a + goldenRatio*(b-a);
+    !     d = a + (1-goldenRatio)*(b-a);
+
+    !     kfval = c
+
+    !     bfval = ( conf%qsell*kfval - conf%xdval ) / conf%qbval
+    !     bkratio = bfval / kfval
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !     ev00 = conf%evbk(bkidx, kidx)
+    !     ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !     ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !     ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !     fc = -evval
+
+
+    !     kfval = d
+
+    !     bfval = ( conf%qsell*kfval - conf%xdval ) / conf%qbval
+    !     bkratio = bfval / kfval
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !     ev00 = conf%evbk(bkidx, kidx)
+    !     ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !     ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !     ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !     evval = beta*evval
+
+    !     fd = -evval
+
+    !     do while (dabs(d-c) > gssTol)
+    !         iter = iter + 1
+    !         if (fc >= fd) then
+    !             z = c + (1.0_rk-goldenRatio)*(b-c)
+    !             ! [a c d b] <--- [c d z b]
+    !             a = c
+    !             c = d; fc = fd
+    !             d = z
+
+    !             kfval = d
+
+    !             bfval = ( conf%qsell*kfval - conf%xdval ) / conf%qbval
+    !             bkratio = bfval / kfval
+    !             kidx = gridlookup(kgrid, knum, kfval)
+    !             kw = gridweight(kgrid, knum, kfval, kidx)
+    !             bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !             bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !             ev00 = conf%evbk(bkidx, kidx)
+    !             ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !             ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !             ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !             evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !             evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !             evval = beta*evval
+
+    !             fd = -evval
+    !         else
+    !             z = a + goldenRatio*(d-a)
+    !             ! [a c d b] <--- [a z c d]
+    !             b = d
+    !             d = c; fd = fc
+    !             c = z
+
+    !             kfval = c
+
+    !             bfval = ( conf%qsell*kfval - conf%xdval ) / conf%qbval
+    !             bkratio = bfval / kfval
+    !             kidx = gridlookup(kgrid, knum, kfval)
+    !             kw = gridweight(kgrid, knum, kfval, kidx)
+    !             bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !             bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !             ev00 = conf%evbk(bkidx, kidx)
+    !             ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !             ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !             ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !             evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !             evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !             evval = beta*evval
+
+    !             fc = -evval
+    !         endif
+    !     enddo
+
+    !     kvdnval = kfval
+    !     bvdnval = bfval
+    !     evdnval = evval
+
+
+    !     ! call gss(evdnval, kvdnval, kvdnGSSObj, LB = LB, UB = UB, func_data = conf)
+    !     ! bvdnval = ( conf%qsell*kvdnval - conf%xdval ) / conf%qbval
+
+    ! end subroutine kvdn
+
+    ! subroutine kvup(bvupval, kvupval, evupval, conf, kstay, kupmax)
+    !     type(configurations), intent(inout) :: conf
+    !     real(rk), intent(in) :: kstay, kupmax
+    !     real(rk), intent(out) :: bvupval, kvupval, evupval
+    !     real(rk) :: UB, LB
+    !     real(rk) :: fmax, bkratio, kw, bkw, evval
+    !     integer :: stat
+    !     integer(ik) :: kidx, bkidx
+    !     real(rk) :: ev00, ev01, ev10, ev11
+
+    !     integer(ik) :: iter
+    !     real(rk) :: a, b, c, d, z, fval, fc, fd, gssTol, gssDist
+    !     real(rk) :: kfval, bfval
+    !     real(rk) :: goldenRatio
+
+    !     goldenRatio = (3.0_rk - dsqrt(5.0_rk)) / 2.0_rk
+
+    !     if (kupmax <= kstay) then
+    !         kvupval = dmin1(kstay, kgrid(1))
+    !         bvupval = ( conf%Qbuy*kvupval - conf%xuval ) / conf%qbval
+    !         bkratio = bvupval / kvupval
+
+    !         kfval = kvupval
+    !         kidx = gridlookup(kgrid, knum, kfval)
+    !         kw = gridweight(kgrid, knum, kfval, kidx)
+    !         bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !         bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+
+    !         ev00 = conf%evbk(bkidx, kidx)
+    !         ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !         ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !         ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+
+    !         evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !         evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+
+    !         evupval = beta*evval
+    !         return
+    !     endif
+
+    !     LB = dmax1(kstay, kgrid(1))
+    !     UB = dmin1(kupmax, kgrid(knum))
+
+    !     iter = 0_ik
+    !     gssTol = 1D-9
+    !     gssDist = 2.0_rk*gssTol
+
+    !     a = LB
+    !     b = UB
+    !     c = a + goldenRatio*(b-a);
+    !     d = a + (1-goldenRatio)*(b-a);
+
+    !     kfval = c
+
+    !     bfval = ( conf%Qbuy*kfval - conf%xuval ) / conf%qbval
+    !     bkratio = bfval / kfval
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !     ev00 = conf%evbk(bkidx, kidx)
+    !     ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !     ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !     ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !     fc = -evval
+
+
+    !     kfval = d
+
+    !     bfval = ( conf%Qbuy*kfval - conf%xuval ) / conf%qbval
+    !     bkratio = bfval / kfval
+    !     kidx = gridlookup(kgrid, knum, kfval)
+    !     kw = gridweight(kgrid, knum, kfval, kidx)
+    !     bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !     bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !     ev00 = conf%evbk(bkidx, kidx)
+    !     ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !     ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !     ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !     evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !     evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !     evval = beta*evval
+
+    !     fd = -evval
+
+    !     do while (dabs(d-c) > gssTol)
+    !         iter = iter + 1
+    !         if (fc >= fd) then
+    !             z = c + (1.0_rk-goldenRatio)*(b-c)
+    !             ! [a c d b] <--- [c d z b]
+    !             a = c
+    !             c = d; fc = fd
+    !             d = z
+
+    !             kfval = d
+
+    !             bfval = ( conf%Qbuy*kfval - conf%xuval ) / conf%qbval
+    !             bkratio = bfval / kfval
+    !             kidx = gridlookup(kgrid, knum, kfval)
+    !             kw = gridweight(kgrid, knum, kfval, kidx)
+    !             bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !             bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !             ev00 = conf%evbk(bkidx, kidx)
+    !             ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !             ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !             ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !             evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !             evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !             evval = beta*evval
+
+    !             fd = -evval
+    !         else
+    !             z = a + goldenRatio*(d-a)
+    !             ! [a c d b] <--- [a z c d]
+    !             b = d
+    !             d = c; fd = fc
+    !             c = z
+
+    !             kfval = c
+
+    !             bfval = ( conf%Qbuy*kfval - conf%xuval ) / conf%qbval
+    !             bkratio = bfval / kfval
+    !             kidx = gridlookup(kgrid, knum, kfval)
+    !             kw = gridweight(kgrid, knum, kfval, kidx)
+    !             bkidx = gridlookup(bkgrid, bknum, bkratio)
+    !             bkw = gridweight(bkgrid, bknum, bkratio, bkidx)
+    !             ev00 = conf%evbk(bkidx, kidx)
+    !             ev10 = conf%evbk(bkidx+1_ik, kidx)
+    !             ev01 = conf%evbk(bkidx, kidx+1_ik)
+    !             ev11 = conf%evbk(bkidx+1_ik, kidx+1_ik)
+    !             evval = bkw * ( ev00*kw + ev01*(1.0_rk - kw) )
+    !             evval = evval + (1.0_rk - bkw) * ( ev10*kw + ev11*(1.0_rk - kw) )
+    !             evval = beta*evval
+
+    !             fc = -evval
+    !         endif
+    !     enddo
+
+    !     kvupval = kfval
+    !     bvupval = bfval
+    !     evupval = evval
+
+    !     ! call gss(evupval, kvupval, kvupGSSObj, LB = LB, UB = UB, func_data = conf)
+    !     ! bvupval = ( conf%Qbuy*kvupval - conf%xuval ) / conf%qbval
+
+    ! end subroutine kvup
+
+
+
     ! subroutine kvdn(bvdnval, kvdnval, evdnval, conf, kstay, kdnmax)
     !     type(configurations), intent(inout) :: conf
     !     type(nlopt_opt) :: opt

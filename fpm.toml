@@ -14,3 +14,7 @@ library = false
 nlopt-f.git = "https://github.com/grimme-lab/nlopt-f"
 finterp = { git="https://github.com/jacobwilliams/finterp.git" }
 pyplot-fortran = { git="https://github.com/jacobwilliams/pyplot-fortran.git" }
+[[test]]
+name = "plot"
+source-dir = "test"
+main = "plot.f90"

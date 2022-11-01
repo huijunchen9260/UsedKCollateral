@@ -17,17 +17,22 @@ badd +1 app/main.f90
 badd +1 src/UsedKCollateral.f90
 badd +14 src/numerics.f90
 badd +1 test/plot.f90
-badd +299 src/innerloop.f90
+badd +1 src/innerloop.f90
 badd +1 src/parameters.f90
 badd +28 term://~/mnt/home/huijunchen/Documents/Google_Drive/Ohio_related/Research/Used_capital_Collateral/code/UsedKCollateral//67366:/bin/zsh
 badd +12 term://~/mnt/home/huijunchen/Documents/Google_Drive/Ohio_related/Research/Used_capital_Collateral/code/UsedKCollateral//48796:/bin/zsh
 badd +6 build/dependencies/ogpf/src/ogpf.f90
 badd +1 src/optMod.f90
+badd +1 src/firmValueIter.f90
+badd +1 src/firmDistribution.f90
+badd +0 src/distMod.f90
 argglobal
 %argdel
 $argadd app/main.f90
 $argadd app/main.f90
 set stal=2
+tabnew +setlocal\ bufhidden=wipe
+tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
 tabnew +setlocal\ bufhidden=wipe
@@ -49,12 +54,12 @@ setlocal fdl=0
 setlocal fml=1
 setlocal fdn=20
 setlocal fen
-let s:l = 667 - ((34 * winheight(0) + 17) / 35)
+let s:l = 67 - ((29 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 667
-normal! 0133|
+keepjumps 67
+normal! 0134|
 tabnext
 edit app/main.f90
 argglobal
@@ -68,12 +73,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 41 - ((25 * winheight(0) + 17) / 35)
+let s:l = 31 - ((11 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 41
-normal! 029|
+keepjumps 31
+normal! 0
 tabnext
 edit src/UsedKCollateral.f90
 argglobal
@@ -92,18 +97,66 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 126 - ((34 * winheight(0) + 17) / 35)
+let s:l = 126 - ((29 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 126
 normal! 0
 tabnext
-edit src/innerloop.f90
+edit src/firmDistribution.f90
 argglobal
-if bufexists(fnamemodify("src/innerloop.f90", ":p")) | buffer src/innerloop.f90 | else | edit src/innerloop.f90 | endif
+if bufexists(fnamemodify("src/firmDistribution.f90", ":p")) | buffer src/firmDistribution.f90 | else | edit src/firmDistribution.f90 | endif
 if &buftype ==# 'terminal'
-  silent file src/innerloop.f90
+  silent file src/firmDistribution.f90
+endif
+balt src/firmValueIter.f90
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 96 - ((12 * winheight(0) + 15) / 30)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 96
+normal! 0
+tabnext
+edit src/distMod.f90
+argglobal
+if bufexists(fnamemodify("src/distMod.f90", ":p")) | buffer src/distMod.f90 | else | edit src/distMod.f90 | endif
+if &buftype ==# 'terminal'
+  silent file src/distMod.f90
+endif
+balt src/firmDistribution.f90
+setlocal fdm=manual
+setlocal fde=0
+setlocal fmr={{{,}}}
+setlocal fdi=#
+setlocal fdl=0
+setlocal fml=1
+setlocal fdn=20
+setlocal fen
+silent! normal! zE
+let &fdl = &fdl
+let s:l = 62 - ((26 * winheight(0) + 13) / 27)
+if s:l < 1 | let s:l = 1 | endif
+keepjumps exe s:l
+normal! zt
+keepjumps 62
+normal! 0
+tabnext
+edit src/firmValueIter.f90
+argglobal
+if bufexists(fnamemodify("src/firmValueIter.f90", ":p")) | buffer src/firmValueIter.f90 | else | edit src/firmValueIter.f90 | endif
+if &buftype ==# 'terminal'
+  silent file src/firmValueIter.f90
 endif
 balt src/UsedKCollateral.f90
 setlocal fdm=manual
@@ -116,12 +169,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 318 - ((24 * winheight(0) + 17) / 35)
+let s:l = 43 - ((29 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 318
-normal! 046|
+keepjumps 43
+normal! 0
 tabnext
 edit src/optMod.f90
 argglobal
@@ -140,12 +193,12 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 259 - ((17 * winheight(0) + 17) / 35)
+let s:l = 13 - ((12 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
-keepjumps 259
-normal! 022|
+keepjumps 13
+normal! 0
 tabnext
 edit src/parameters.f90
 argglobal
@@ -164,7 +217,7 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 158 - ((27 * winheight(0) + 17) / 35)
+let s:l = 158 - ((23 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -188,7 +241,7 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 266 - ((20 * winheight(0) + 17) / 35)
+let s:l = 266 - ((17 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
@@ -212,13 +265,13 @@ setlocal fdn=20
 setlocal fen
 silent! normal! zE
 let &fdl = &fdl
-let s:l = 41 - ((0 * winheight(0) + 17) / 35)
+let s:l = 41 - ((0 * winheight(0) + 15) / 30)
 if s:l < 1 | let s:l = 1 | endif
 keepjumps exe s:l
 normal! zt
 keepjumps 41
-normal! 093|
-tabnext 8
+normal! 083|
+tabnext 5
 set stal=1
 if exists('s:wipebuf') && len(win_findbuf(s:wipebuf)) == 0 && getbufvar(s:wipebuf, '&buftype') isnot# 'terminal'
   silent exe 'bwipe ' . s:wipebuf

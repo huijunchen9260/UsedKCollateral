@@ -2,6 +2,7 @@ module parameters
 
     ! use iso_Fortran_env, only: rk => real64, ik => int32
     use numerics
+    use pyplot_module
     implicit none
 
     ! ------ !
@@ -9,16 +10,19 @@ module parameters
     ! ------ !
     character(len=*), parameter :: resDir = "./results/"
     character(len=*), parameter :: figDir = "./figures/"
+    character(len=*), parameter :: tmpFigDir = "./tmpFigures/"
     character(len=*), parameter :: figPyDir = "./pyfile/"
     character(len=1000) :: sep
     character(len=1), parameter :: tab = char(9)
-    ! logical, parameter :: drawfig = .true.
     logical, parameter :: show_wvalueiter = .true.
     logical, parameter :: show_minSavingPolicy = .true.
     logical, parameter :: show_vvalueiter = .true.
+    logical, parameter :: show_steadyStateDistribution = .true.
     ! logical, parameter :: saveLog = .true.
     ! integer(ik) :: logunit = 20
     ! character(len=*), parameter :: logfile = "./log.txt"
+
+    character(len=*), parameter :: strfmt = 'F8.3'
 
     real(rk) :: t0, t1
 
@@ -30,6 +34,7 @@ module parameters
     real(rk), parameter :: wTol = 1.0D-7
     real(rk), parameter :: vTol = 1.0D-7
     real(rk), parameter :: minBTol = 1.0D-7
+    real(rk), parameter :: ssDistTol = 1.0D-7
     integer(ik), parameter :: maxwiter = 1000_ik
     integer(ik), parameter :: maxviter = 200_ik
     integer(ik), parameter :: maxbtildeiter = 1000_ik
@@ -40,6 +45,8 @@ module parameters
     integer(ik), parameter :: knum = 350_ik
     integer(ik), parameter :: bknum = 350_ik
     integer(ik), parameter :: enum = 7_ik
+    integer(ik), parameter :: muknum = 600
+    integer(ik), parameter :: mubknum = 400_ik
 
     ! ---------- !
     ! parameters !
@@ -58,7 +65,9 @@ module parameters
     real(rk), parameter :: s = 5.0_rk             ! I-tech: CES coefficient
     real(rk), parameter :: rho_e = 0.687_rk       ! Autocor of AR(1) idio. shock
     real(rk), parameter :: sigma_e = 0.117_rk     ! std of AR(1) idio. shock
-    real(rk), parameter :: exitprob = 0.1_rk
+    real(rk), parameter :: exitprob = 0.1_rk      ! exit probability
+    real(rk), parameter :: chi = 0.1_rk           ! new firm capital size over average incumbent
+    real(rk), parameter :: omegasw = 0.291_rk     ! no-constraint firm ratio
 
     ! golden ratio
     real(rk), parameter :: rg = (3.0_rk - dsqrt(5.0_rk)) / 2.0_rk
@@ -71,8 +80,12 @@ module parameters
     real(rk), dimension(knum) :: kgrid
     real(rk), dimension(enum) :: egrid
     real(rk), dimension(bknum) :: bkgrid
+    real(rk), dimension(muknum) :: mukgrid
+    real(rk), dimension(mubknum) :: mubkgrid
     real(rk), dimension(enum) :: piess
     real(rk), dimension(enum, enum) :: pie
+
+
 
     type solutions
         ! wvalueiter
@@ -84,25 +97,42 @@ module parameters
         logical, dimension(:, :, :), allocatable :: wtrue
         ! vvalueiter
         real(rk), dimension(:, :, :), allocatable :: v, gvk, gvb
+        ! steadyStateDistribution
+        real(rk), dimension(:, :), allocatable :: muw
+        real(rk), dimension(:, :, :), allocatable :: muv
+        real(rk) :: scrapk
+        real(rk) :: bornK
+        real(rk) :: kagg
+        real(rk) :: kfagg
+        real(rk) :: nagg
+        real(rk) :: invagg
+        real(rk) :: divagg
+        real(rk) :: invusedagg
+        real(rk) :: invnewagg
+        real(rk) :: yagg
+        real(rk) :: cagg
+        real(rk) :: bvfagg
     end type
 
     type configurations
-        real(rk) :: zval                    ! TFP shock
-        real(rk) :: wval                    ! wage
-        real(rk) :: pval                    ! Marginal utility
-        real(rk) :: pfval                   ! future Marginal utility
-        real(rk) :: qbval                   ! bond price
-        real(rk) :: Qbuy                    ! capital purchasing price
-        real(rk) :: qsell                   ! capital selling price
-        real(rk) :: xuval                   ! cash on hand for upward-adj firm
-        real(rk) :: xdval                   ! cash on hand for downward-adj firm
-        ! real(rk), allocatable :: ewbk(:, :)
-        ! real(rk), allocatable :: ewk(:)
-        ! real(rk), allocatable :: evbk(:, :)
-        ! real(rk), allocatable :: evk(:)
-        real(rk) :: ewk(knum)
-        real(rk) :: evbk(bknum, knum)
+        real(rk) :: zval                        ! TFP shock
+        real(rk) :: wval                        ! wage
+        real(rk) :: pval                        ! Marginal utility
+        real(rk) :: pfval                       ! future Marginal utility
+        real(rk) :: qbval                       ! bond price
+        real(rk) :: Qbuy                        ! capital purchasing price
+        real(rk) :: qsell                       ! capital selling price
+        real(rk) :: xuval                       ! cash on hand for upward-adj firm
+        real(rk) :: xdval                       ! cash on hand for downward-adj firm
+        real(rk), allocatable :: ewk(:)         ! conditional expectation for w given eps when bk = 0
+        real(rk), allocatable :: evbk(:, :)     ! conditional expectation for v given eps
+        real(rk) :: usednewratio                ! used/new investment ratio
+        real(rk) :: invnewratio                 ! new/invagg ratio
     end type
+
+    type(pyplot) :: plt
+    type(solutions) :: sol
+    type(configurations) :: conf
 
 contains
 
@@ -112,7 +142,8 @@ contains
         real(rk) :: tempterm(enum, enum)
 
         ! egrid and pie
-        call tauchen(0.0_rk, sigma_e, rho_e, 2.575_rk, enum, egrid, pie)
+        ! call tauchen(0.0_rk, sigma_e, rho_e, 2.575_rk, enum, egrid, pie)
+        call tauchen(0.0_rk, sigma_e, rho_e, 2.25_rk, enum, egrid, pie)
         egrid = exp(egrid)
 
         ! steady state pie
@@ -125,39 +156,77 @@ contains
         kgrid = linspace(kbounds(1), kbounds(2), knum)
         bkgrid = linspace(bkbounds(1), bkbounds(2), bknum)
 
+        mukgrid = linspace(kbounds(1), kbounds(2), muknum)
+        mubkgrid = linspace(bkbounds(1), bkbounds(2), mubknum)
+
     end subroutine initGrids
 
     subroutine initSol(sol)
 
         type(solutions), intent(inout) :: sol
 
+        ! wvalueiter
         if (allocated(sol%w)) deallocate(sol%w)
         if (allocated(sol%gwk)) deallocate(sol%gwk)
         if (allocated(sol%kwupvec)) deallocate(sol%kwupvec)
         if (allocated(sol%kwdnvec)) deallocate(sol%kwdnvec)
         if (allocated(sol%ewupvec)) deallocate(sol%ewupvec)
         if (allocated(sol%ewdnvec)) deallocate(sol%ewdnvec)
+        ! minSavingPolicy
         if (allocated(sol%btilde)) deallocate(sol%btilde)
         if (allocated(sol%gwb)) deallocate(sol%gwb)
         if (allocated(sol%wtrue)) deallocate(sol%wtrue)
+        ! vvalueiter
         if (allocated(sol%v)) deallocate(sol%v)
         if (allocated(sol%gvk)) deallocate(sol%gvk)
         if (allocated(sol%gvb)) deallocate(sol%gvb)
+        ! aggregateDynamic
+        if (allocated(sol%muw)) deallocate(sol%muw)
+        if (allocated(sol%muv)) deallocate(sol%muv)
 
 
+        ! wvalueiter
         allocate(sol%w(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gwk(knum, enum), source=0.0_rk)
         allocate(sol%kwupvec(enum), source=0.0_rk)
         allocate(sol%kwdnvec(enum), source=0.0_rk)
         allocate(sol%ewupvec(enum), source=0.0_rk)
         allocate(sol%ewdnvec(enum), source=0.0_rk)
+        ! minSavingPolicy
         allocate(sol%btilde(knum, enum), source=0.0_rk)
         allocate(sol%gwb(knum, enum), source=0.0_rk)
         allocate(sol%wtrue(bknum, knum, enum), source = .false.)
+        ! vvalueiter
         allocate(sol%v(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvk(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvb(bknum, knum, enum), source=0.0_rk)
+        ! aggregateDynamic
+        allocate(sol%muw(muknum, enum), source=0.0_rk)
+        allocate(sol%muv(mubknum, muknum, enum), source=0.0_rk)
+
+        sol%scrapk = 0.0_rk
+        sol%bornK = 0.0_rk
+        sol%kagg = 0.0_rk
+        sol%kfagg = 0.0_rk
+        sol%nagg = 0.0_rk
+        sol%invagg = 0.0_rk
+        sol%invusedagg = 0.0_rk
+        sol%invnewagg = 0.0_rk
+        sol%yagg = 0.0_rk
+        sol%cagg = 0.0_rk
+        sol%bvfagg = 0.0_rk
 
     end subroutine initSol
+
+    subroutine initConf(conf)
+        type(configurations), intent(inout) :: conf
+
+        if (allocated(conf%ewk)) deallocate(conf%ewk)
+        if (allocated(conf%evbk)) deallocate(conf%evbk)
+
+        allocate(conf%ewk(knum), source = 0.0_rk)
+        allocate(conf%evbk(bknum, knum), source = 0.0_rk)
+
+    end subroutine initConf
 
 end module parameters

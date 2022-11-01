@@ -121,6 +121,7 @@ contains
             gssDist = b - a
 
             if (iter == 1 .and. isShow) then
+                write(*, *) ''
                 write(*, '(a4, 5(a20))') 'iter', '||b-a||', 'a', 'c', 'd', 'b'
                 write(tmp, '(a4, 5(a20))') 'iter', '||b-a||', 'a', 'c', 'd', 'b'
                 write(*, '(a)') repeat('=', len_trim(tmp))

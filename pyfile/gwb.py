@@ -10,6 +10,7 @@ matplotlib.rcParams["axes.labelsize"] = 10
 matplotlib.rcParams["xtick.labelsize"] = 10
 matplotlib.rcParams["ytick.labelsize"] = 10
 matplotlib.rcParams["legend.fontsize"] = 10
+matplotlib.rcParams["text.usetex"] = True
 
 fig = plt.figure(facecolor="white")
 ax = fig.add_subplot(1, 1, 1)

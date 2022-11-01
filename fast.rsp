@@ -1,0 +1,3 @@
+options run
+options --compiler gfortran
+options --flag "-Ofast -march=native -mtune=native -pipe -fopenmp -flto -Wall -pedantic -g -llapack -lblas -lm"

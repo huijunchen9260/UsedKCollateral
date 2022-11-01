@@ -6,16 +6,16 @@ module optMod
     use goldenSectionSearch
     use nlopt_wrap
     use nlopt_enum
-    use linear_interpolation_module
     implicit none
 
 contains
 
-    subroutine kvrule(bvfval, kvfval, vval, bprimemax, bthreshold, kstay, bval, conf)
+    subroutine kvrule(bvfval, kvfval, vval, choiceik, bprimemax, bthreshold, kstay, bval, conf)
         type(configurations), intent(inout) :: conf
         integer(ik) :: kidx, bkidx
         real(rk), intent(in) :: bprimemax, bthreshold, kstay, bval
         real(rk), intent(out) :: bvfval, kvfval, vval
+        integer(ik), intent(out) :: choiceik
         real(rk) :: kupmax, kdnmax, bkratio
         real(rk) :: bvupval, kvupval, evupval, bvdnval, kvdnval, evdnval, bvalsolp
         real(rk) :: kw, bkw, evval, LB, UB
@@ -35,6 +35,7 @@ contains
             evval = evval + (1.0_rk - bkw) * ( conf%evbk(bkidx+1_rk, kidx)*kw + conf%evbk(bkidx+1_rk, kidx+1_ik)*(1.0_rk - kw) )
             evval = beta*evval
             vval = (1.0_rk - exitprob)*evval + exitprob*conf%pval*conf%xdval
+            choiceik = 4_ik
             return
         endif
 
@@ -65,6 +66,32 @@ contains
         endif
 
         vval = (1.0_rk - exitprob)*vval + exitprob*conf%pval*conf%xdval
+
+        ! ---------------------------------------------------------- !
+        ! choiceik entries for a wtype firm:                         !
+        !     1: kstarup,                                            !
+        !     2: kstardn,                                            !
+        !     3: positive investment to maximum \bar{k}_u(k, b, eps) !
+        !     4: must negative to repay debt                         !
+        !     5: noadj                                               !
+        ! ---------------------------------------------------------- !
+        if (abs(kvfval - kstay) <= vTol) then
+            choiceik = 5_ik
+        else
+            if (kvfval > kstay) then
+                if (kupmax - kvfval >= vTol) then
+                    choiceik = 1_ik
+                else
+                    choiceik = 3_ik
+                endif
+            else
+                if (bval > bthreshold) then
+                    choiceik = 4_ik
+                else
+                    choiceik = 2_ik
+                endif
+            endif
+        endif
 
     end subroutine kvrule
 
@@ -106,7 +133,6 @@ contains
         call gss(evdnval, kvdnval, kvdnGSSObj, LB = LB, UB = UB, func_data = conf)
         bvdnval = ( conf%qsell*kvdnval - conf%xdval ) / conf%qbval
 
-
     end subroutine kvdn
 
     subroutine kvup(bvupval, kvupval, evupval, conf, kstay, kupmax)
@@ -123,6 +149,7 @@ contains
             kvupval = dmin1(kstay, kgrid(1))
             bvupval = ( conf%Qbuy*kvupval - conf%xuval ) / conf%qbval
             bkratio = bvupval / kvupval
+
             kidx = gridlookup(kgrid, knum, kvupval)
             kw = gridweight(kgrid, knum, kvupval, kidx)
             bkidx = gridlookup(bkgrid, bknum, bkratio)
@@ -223,10 +250,11 @@ contains
 
     end function kvupGSSObj
 
-    subroutine kwrule(wstar, kstar, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
+    subroutine kwrule(wstar, kstar, isKUp, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
         real(rk), intent(in) :: yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar
         type(configurations), intent(inout) :: conf
         real(rk), intent(out) :: wstar, kstar
+        logical, intent(out) :: isKUp
         real(rk) :: kup, ewup, kdn, ewdn, wup, wdn, evval, kw
         real(rk) :: flowval
         integer(ik) :: kidx
@@ -260,10 +288,12 @@ contains
             ! considering exogenous firm exiting
             wstar = flowval + (1.0_rk - exitprob)*wup + exitprob * conf%pval * conf%qsell * kstay
             kstar = kup
+            isKUp = .true.
         else
             ! considering exogenous firm exiting
             wstar = flowval + (1.0_rk - exitprob)*wdn + exitprob * conf%pval * conf%qsell * kstay
             kstar = kdn
+            isKUp = .false.
         endif
 
     end subroutine kwrule
@@ -313,5 +343,17 @@ contains
         fval = -1.0_rk * pval * Jval * kfval + beta*evval
 
     end function kwupGSSObj
+
+    subroutine debtThreshold(nval, yval, bprimemax, bthreshold, kval, epsval, conf)
+        real(rk), intent(in) :: kval, epsval
+        type(configurations), intent(in) :: conf
+        real(rk), intent(out) :: nval, yval, bprimemax, bthreshold
+
+        nval = ( ( nu * conf%zval * epsval * kval**alpha ) / conf%wval )**(1/(1-nu))
+        yval = conf%zval * epsval * kval**alpha * nval**nu
+        bprimemax = zeta*kval
+        bthreshold = yval - conf%wval*nval + conf%qbval*bprimemax
+
+    end subroutine debtThreshold
 
 end module optMod
