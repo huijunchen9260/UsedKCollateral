@@ -17,7 +17,7 @@ program main
 
     call initGrids()
     call initSol(sol)
-    call initConf(conf)
+    ! call initConf(conf)
 
     conf%zval = zss
     conf%wval = 1.087975585937500_rk
@@ -38,16 +38,16 @@ program main
     call cpu_time(time0)
 
     call wvalueiter(sol, conf)
-    call minSavingPolicy(sol, conf)
-    call vvalueiter(sol, conf)
+    ! call minSavingPolicy(sol, conf)
+    ! call vvalueiter(sol, conf)
 
-    call steadyStateDistribution(sol, conf)
+    ! call steadyStateDistribution(sol, conf)
 
 
     call cpu_time(time1)
 
     write(*, *) 'elapsed time: ', time1 - time0, ' seconds.'
 
-    call saveResult(sol)
+    ! call saveResult(sol)
 
 end program main

@@ -501,7 +501,7 @@ contains
                 enddo vDist_mukloop
             enddo vDist_epsloop
 
-            sol%scrapk = conf%qsell * (1.0_rk - delta) * sol%kagg
+            sol%scrapk = (1.0_rk - delta) * sol%kagg
 
             kpaggf = 0.0_rk
             do indk = 1, muknum, 1
@@ -594,15 +594,15 @@ contains
             sol%muv = tmuv
 
             if (iter == 1 .and. show_steadyStateDistribution) then
-                write(*, '(a4, 7(a20))') 'iter', 'distmuw', 'distmuv', 'sum(muw)', 'sum(muv)', 'total', 'kagg', 'VMass'
+                write(*, '(a4, 6(a20))') 'iter', 'distmuw', 'distmuv', 'sum(muw)', 'sum(muv)', 'total', 'kagg'
                 ! write the same content into the variable sep
-                write(sep, '(a4, 7(a20))') 'iter', 'distmuw', 'distmuv', 'sum(muw)', 'sum(muv)', 'total', 'kagg', 'VMass'
+                write(sep, '(a4, 6(a20))') 'iter', 'distmuw', 'distmuv', 'sum(muw)', 'sum(muv)', 'total', 'kagg'
                 ! repeatively print = with the length of sep
                 write(*, '(a)') repeat('=', len_trim(sep))
             endif
             if (show_steadyStateDistribution) then
-                write(*, '(I4, 7(ES20.6))') iter, distmuw, distmuv, &
-                    sum(sol%muw), sum(sol%muv), sum(sol%muw) + sum(sol%muv), sol%kagg, VMass
+                write(*, '(I4, 6(ES20.6))') iter, distmuw, distmuv, &
+                    sum(sol%muw), sum(sol%muv), sum(sol%muw) + sum(sol%muv), sol%kagg
             endif
 
         enddo ssDist_while
@@ -624,16 +624,35 @@ contains
 
         sol%divagg = sum(divgridw*sol%muw) + sum(divgridv*sol%muv)
 
-        ! sol%kfagg = sum(kfgridw*sol%muw) + sum(kfgridv*sol%muv)
-        ! sol%bvfagg = sum(bkfgridv*sol%muv)
+        ! I think kfagg and bvfagg should be calculated using kfgridw,
+        ! kfgridv and bkfgridv because the policy function is off-grid,
+        ! so I linearly interpolate the decision rule on firm's problem
+        ! so build decision rule on distribution.
 
+        ! This way
+        sol%kfagg = sum(kfgridw*sol%muw) + sum(kfgridv*sol%muv)
+        sol%bvfagg = sum(bkfgridv*sol%muv)
+
+        ! ! but not this way (which is how Khan & Thomas (2013) calculated
         ! do inde = 1, enum, 1
         !     do indk = 1, muknum, 1
-        !         sol%kfagg = sol%kfagg + mukgrid(indk)*
+        !         sol%kfagg = sol%kfagg + mukgrid(indk)*sol%muw(indk, inde)
+        !         do indbk = 1, mubknum, 1
+        !             bval = mukgrid(indk)*mubkgrid(indbk)
+        !             sol%kfagg = sol%kfagg + mukgrid(indk)*sol%muv(indbk, indk, inde)
+        !             sol%bvfagg = sol%bvfagg + bval*sol%muv(indbk, indk, inde)
+        !         enddo
         !     enddo
         ! enddo
 
-        ! write(*, *) sol%kfagg, sol%bvfagg
+        sol%cagg = sol%yagg &
+                   - (1.0_rk - exitprob) * conf%Qbuy * sol%invagg &
+                   + (1.0_rk - exitprob) * conf%qsell * sol%divagg &
+                   - exitprob * sol%bornK &
+                   + exitprob * conf%qsell * sol%scrapk
+
+        write(*, *) sol%invusedagg, sol%divagg, psi*sol%cagg, conf%wval
+
 
     ! call plt%initialize(&
     !     usetex = .true., &

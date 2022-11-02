@@ -88,6 +88,7 @@ contains
                     kval = kgrid(indk)
                     kstay = (1.0_rk - delta)*kval
                     call debtThreshold(nval, yval, bprimemax, bthreshold, kval, epsval, conf)
+                    ! !$omp parallel do private(indbk, bkval, bval)
                     bkloop: do indbk = 1, bknum, 1
                         bkval = bkgrid(indbk)
                         bval = bkval*kval
@@ -322,7 +323,7 @@ contains
             ! solve efficient unit of capital !
             ! ------------------------------- !
 
-            ! !$OMP PARALLEL DO COLLAPSE(3) default(none) private(inde, indk, indbk) shared(enum, egrid, )
+            ! !$omp parallel do private(inde, epsval, conf, ewdnstar, kwdnstar, ewupstar, kwupstar)
             do inde = 1, enum, 1
                 epsval = egrid(inde)
                 conf%ewk = ew(bkidx0, :, inde)*bkw0 + ew(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
@@ -335,6 +336,7 @@ contains
                 call gss(ewupstar, kwupstar, kwupGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
                 sol%kwupvec(inde) = kwupstar; sol%ewupvec(inde) = ewupstar
                 sol%kwdnvec(inde) = kwdnstar; sol%ewdnvec(inde) = ewdnstar
+                ! !$omp parallel do private(indk, kval, kstay, nval, yval, wstar, kstar, isKUp)
                 do indk = 1, knum, 1
                     kval = kgrid(indk)
                     kstay = (1.0_rk - delta)*kval
@@ -342,6 +344,8 @@ contains
                     yval = conf%zval * epsval * kval**alpha * nval**nu
                     call kwrule(wstar, kstar, isKUp, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
                     tgwk(indk, inde) = kstar
+
+                    ! !$omp parallel do private(indbk, bval)
                     do indbk = 1, bknum, 1
                         bval = bkgrid(indbk)*kval
                         tw(indbk, indk, inde) = wstar - conf%pval * bval

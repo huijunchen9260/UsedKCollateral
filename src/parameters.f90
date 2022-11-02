@@ -124,8 +124,8 @@ module parameters
         real(rk) :: qsell                       ! capital selling price
         real(rk) :: xuval                       ! cash on hand for upward-adj firm
         real(rk) :: xdval                       ! cash on hand for downward-adj firm
-        real(rk), allocatable :: ewk(:)         ! conditional expectation for w given eps when bk = 0
-        real(rk), allocatable :: evbk(:, :)     ! conditional expectation for v given eps
+        real(rk), dimension(knum) :: ewk
+        real(rk), dimension(bknum, knum) :: evbk! conditional expectation for v given eps
         real(rk) :: usednewratio                ! used/new investment ratio
         real(rk) :: invnewratio                 ! new/invagg ratio
     end type
@@ -218,15 +218,15 @@ contains
 
     end subroutine initSol
 
-    subroutine initConf(conf)
-        type(configurations), intent(inout) :: conf
+    ! subroutine initConf(conf)
+    !     type(configurations), intent(inout) :: conf
 
-        if (allocated(conf%ewk)) deallocate(conf%ewk)
-        if (allocated(conf%evbk)) deallocate(conf%evbk)
+    !     if (allocated(conf%ewk)) deallocate(conf%ewk)
+    !     if (allocated(conf%evbk)) deallocate(conf%evbk)
 
-        allocate(conf%ewk(knum), source = 0.0_rk)
-        allocate(conf%evbk(bknum, knum), source = 0.0_rk)
+    !     allocate(conf%ewk(knum), source = 0.0_rk)
+    !     allocate(conf%evbk(bknum, knum), source = 0.0_rk)
 
-    end subroutine initConf
+    ! end subroutine initConf
 
 end module parameters
