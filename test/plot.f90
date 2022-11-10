@@ -31,13 +31,44 @@ program plot
 
     write(*, *) "Start Plotting!"
 
+
     inde = 4
     call plt%initialize(&
         usetex = .true., &
-        xlabel = '$b/k$', &
+        ylabel = '$k$', &
+        xlabel = '$\\frac{b}{k}$', &
+        zlabel = 'muv', &
+        title = 'V-type (constrained) firm distribution, $\\epsilon = $' // num2str(egrid(inde), strfmt),&
+        mplot3d = .true., &
+        tight_layout = .true. &
+        )
+
+    call plt%plot_wireframe(&
+        mubkgrid, &
+        mukgrid, &
+        sol%muv(:, :, inde), &
+        label = "muv", &
+        antialiased = .true., &
+        linestyle = '-' &
+        )
+    if (savefig) then
+        call plt%savefig(&
+            figDir // "muv.pdf", &
+            pyfile = figPyDir // "muv.py" &
+            )
+    else
+        call plt%showfig()
+    endif
+
+    ! stop
+
+    inde = 4
+    call plt%initialize(&
+        usetex = .true., &
+        xlabel = '$\\frac{b}{k}$', &
         ylabel = '$k$', &
         zlabel = "$k'$", &
-        title = 'V-type (constrained) capital decision function',&
+        title = 'V-type (constrained) capital decision function, $\\epsilon = $' // num2str(egrid(inde), strfmt),&
         mplot3d = .true., &
         tight_layout = .true. &
         )
@@ -53,6 +84,60 @@ program plot
         call plt%savefig(&
             figDir // "gvk_3D.pdf", &
             pyfile = figPyDir // "gvk_3D.py" &
+            )
+    else
+        call plt%showfig()
+    endif
+
+    inde = 4
+    call plt%initialize(&
+        usetex = .true., &
+        xlabel = '$\\frac{b}{k}$', &
+        ylabel = '$k$', &
+        zlabel = '$v$', &
+        title = 'V-type (constrained) value function, $\\epsilon = $' // num2str(egrid(inde), strfmt),&
+        mplot3d = .true., &
+        tight_layout = .true. &
+        )
+    call plt%plot_wireframe(&
+        bkgrid, &
+        kgrid, &
+        sol%v(:, :, inde), &
+        label = "v", &
+        antialiased = .true., &
+        linestyle = '-' &
+        )
+    if (savefig) then
+        call plt%savefig(&
+            figDir // "v_3D.pdf", &
+            pyfile = figPyDir // "v_3D.py" &
+            )
+    else
+        call plt%showfig()
+    endif
+
+    inde = 4
+    call plt%initialize(&
+        usetex = .true., &
+        xlabel = '$\\frac{b}{k}$', &
+        ylabel = '$k$', &
+        zlabel = "$\\frac{b'}{k}$", &
+        title = 'V-type (constrained) leverage decision rule, $\\epsilon = $' // num2str(egrid(inde), strfmt),&
+        mplot3d = .true., &
+        tight_layout = .true. &
+        )
+    call plt%plot_wireframe(&
+        bkgrid, &
+        kgrid, &
+        sol%gvbk(:, :, inde), &
+        label = "b'", &
+        antialiased = .true., &
+        linestyle = '-' &
+        )
+    if (savefig) then
+        call plt%savefig(&
+            figDir // "gvb_3D.pdf", &
+            pyfile = figPyDir // "gvb_3D.py" &
             )
     else
         call plt%showfig()

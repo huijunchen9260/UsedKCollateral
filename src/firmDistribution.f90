@@ -341,7 +341,7 @@ contains
         iter = 0_ik
         dist = 2.0_rk*ssDistTol
 
-        ssDist_while: do while (dist > ssDistTol)
+        ssDist_while: do while (dist > ssDistTol .and. iter <= maxssDistiter)
 
             iter = iter + 1
 
@@ -650,9 +650,6 @@ contains
                    + (1.0_rk - exitprob) * conf%qsell * sol%divagg &
                    - exitprob * sol%bornK &
                    + exitprob * conf%qsell * sol%scrapk
-
-        write(*, *) sol%invusedagg, sol%divagg, psi*sol%cagg, conf%wval
-
 
     ! call plt%initialize(&
     !     usetex = .true., &

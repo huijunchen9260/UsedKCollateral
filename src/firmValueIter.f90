@@ -23,7 +23,7 @@ contains
         real(rk) :: kvfval, bvfval, vval
         real(rk) :: bprimemax, bthreshold
         real(rk) :: bkw0
-        real(rk), dimension(:, :, :), allocatable :: ew, ev, tv, tgvk, tgvb
+        real(rk), dimension(:, :, :), allocatable :: ew, ev, tv, tgvk, tgvb, tgvbk
         logical :: isKUp
 
         allocate(ev(bknum, knum, enum), source = 0.0_rk)
@@ -31,6 +31,7 @@ contains
         allocate(tv(bknum, knum, enum), source = 0.0_rk)
         allocate(tgvk(bknum, knum, enum), source = 0.0_rk)
         allocate(tgvb(bknum, knum, enum), source = 0.0_rk)
+        allocate(tgvbk(bknum, knum, enum), source = 0.0_rk)
 
         iter = 0_ik
         dist = 2.0_rk*vTol
@@ -80,68 +81,50 @@ contains
             epsloop: do inde = 1, enum, 1
                 epsval = egrid(inde)
                 conf%evbk = ev(:, :, inde)
-                conf%ewk = ew(bkidx0, :, inde)*bkw0 + ew(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
-                call gss(ewdnstar, kwdnstar, kwdnGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
-                call gss(ewupstar, kwupstar, kwupGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
+                ! conf%ewk = ew(bkidx0, :, inde)*bkw0 + ew(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
+                ! call gss(ewdnstar, kwdnstar, kwdnGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
+                ! call gss(ewupstar, kwupstar, kwupGSSObj, LB = kgrid(1), UB = kgrid(knum), func_data = conf)
 
                 kloop: do indk = 1, knum, 1
                     kval = kgrid(indk)
                     kstay = (1.0_rk - delta)*kval
                     call debtThreshold(nval, yval, bprimemax, bthreshold, kval, epsval, conf)
-                    ! !$omp parallel do private(indbk, bkval, bval)
                     bkloop: do indbk = 1, bknum, 1
                         bkval = bkgrid(indbk)
                         bval = bkval*kval
                         conf%xuval = yval - conf%wval*nval - bval + conf%Qbuy*kstay
                         conf%xdval = yval - conf%wval*nval - bval + conf%qsell*kstay
                         if (sol%wtrue(indbk, indk, inde)) then
-                            call kwrule(wstar, kstar, isKUp, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
+                            ! call kwrule(wstar, kstar, isKUp, yval, nval, kstay, kwupstar, ewupstar, kwdnstar, ewdnstar, conf)
+                            ! tv(indbk, indk, inde) = wstar - conf%pval * bval
+                            ! tgvk(indbk, indk, inde) = kstar
+                            ! tgvb(indbk, indk, inde) = sol%gwb(indk, inde)
+                            ! tgvbk(indbk, indk, inde) = sol%gwb(indk, inde) / kval
                             tv(indbk, indk, inde) = sol%w(indbk, indk, inde)
                             tgvk(indbk, indk, inde) = sol%gwk(indk, inde)
                             tgvb(indbk, indk, inde) = sol%gwb(indk, inde)
+                            tgvbk(indbk, indk, inde) = sol%gwb(indk, inde) / kval
                         else
                             call kvrule(bvfval, kvfval, vval, choiceik, bprimemax, bthreshold, kstay, bval, conf)
                             tv(indbk, indk, inde) = vval
                             tgvk(indbk, indk, inde) = kvfval
                             tgvb(indbk, indk, inde) = bvfval
+                            tgvbk(indbk, indk, inde) = bvfval / kval
                         endif
                     enddo bkloop
                 enddo kloop
             enddo epsloop
 
-            ! epsloop: do inde = 1, enum, 1
-            !     epsval = egrid(inde)
-            !     kloop: do indk = 1, knum, 1
-            !         kval = kgrid(indk)
-            !         kstay = (1.0_rk - delta)*kval
-            !         call debtThreshold(nval, yval, bprimemax, bthreshold, kval, epsval, conf)
-            !         bkloop: do indbk = 1, bknum, 1
-            !             bkval = bkgrid(indbk)
-            !             bval = bkval*kval
-            !             conf%xuval = yval - conf%wval*nval - bval + conf%Qbuy*kstay
-            !             conf%xdval = yval - conf%wval*nval - bval + conf%qsell*kstay
-            !             if (sol%wtrue(indbk, indk, inde)) then
-            !                 tv(indbk, indk, inde) = sol%w(indbk, indk, inde)
-            !                 tgvk(indbk, indk, inde) = sol%gwk(indk, inde)
-            !                 tgvb(indbk, indk, inde) = sol%gwb(indk, inde)
-            !             else
-            !                 call kvrule(bvfval, kvfval, vval, choiceik, bprimemax, bthreshold, kstay, bval, conf)
-            !                 tv(indbk, indk, inde) = vval
-            !                 tgvk(indbk, indk, inde) = kvfval
-            !                 tgvb(indbk, indk, inde) = bvfval
-            !             endif
-            !         enddo bkloop
-            !     enddo kloop
-            ! enddo epsloop
-
             distv = maxval(dabs(sol%v - tv))
             distgvk = maxval(dabs(sol%gvk - tgvk))
             distgvb = maxval(dabs(sol%gvb - tgvb))
-            dist = dmax1(distv, distgvk, distgvb)
+            ! dist = dmax1(distv, distgvk, distgvb)
+            dist = distv
 
             sol%v = tv
             sol%gvk = tgvk
             sol%gvb = tgvb
+            sol%gvbk = tgvbk
 
             if (iter == 1 .and. show_vvalueiter) then
                 ! print on terminal
@@ -155,7 +138,7 @@ contains
             if (show_vvalueiter) then
                 write(*, '(I4, 8(ES20.6))') iter, distv, distgvk, distgvb, &
                                             minval(sol%gvk), maxval(sol%gvk), &
-                                            minval(sol%gvb), maxval(sol%gvb)
+                                            minval(sol%gvbk), maxval(sol%gvbk)
             endif
 
         enddo mainwhile
@@ -174,13 +157,14 @@ contains
         real(rk) :: epsval, nval, yval, kval, kfval, bfwval, bminval, Jval, bval
         integer(ik), dimension(:, :), allocatable :: kidxmat
         real(rk), dimension(:), allocatable :: bfw
-        real(rk), dimension(:, :), allocatable :: tbtilde, kwmat, bfwmat
+        real(rk), dimension(:, :), allocatable :: tbtilde, kwmat, bfwmat, arraybkbounds
 
         allocate(bfw(enum), source = 0.0_rk)
         allocate(tbtilde(knum, enum), source = 0.0_rk)
         allocate(kidxmat(knum, enum), source = 0_ik)
         allocate(kwmat(knum, enum), source = 0.0_rk)
         allocate(bfwmat(knum, enum), source = 0.0_rk)
+        allocate(arraybkbounds(2, knum), source = 0.0_rk)
 
         write(*, *) "minimum saving policy for unconstrained firm (W-type)"
 
@@ -237,23 +221,28 @@ contains
 
                     tbtilde(indk, inde) = bminval
                 enddo
+
+                arraybkbounds(1, inde) = minval(tbtilde(:, inde) / kgrid)
+                arraybkbounds(2, inde) = maxval(tbtilde(:, inde) / kgrid)
             enddo
 
             dist = maxval(dabs(sol%btilde - tbtilde))
             sol%btilde = tbtilde
             sol%gwb = bfwmat
 
+
             if (iter == 1 .and. show_minSavingPolicy) then
                 ! print on terminal
-                write(*, '(a4, 3(a20))') 'iter', 'dist', 'bwmin', 'bwmax'
+                write(*, '(a4, 5(a20))') 'iter', 'dist', 'bwmin', 'bwmax', 'bkmin', 'bkmax'
                 ! write the same content into the variable sep
-                write(sep, '(a4, 3(a20))') 'iter', 'dist', 'bwmin', 'bwmax'
+                write(sep, '(a4, 5(a20))') 'iter', 'dist', 'bwmin', 'bwmax', 'bkmin', 'bkmax'
                 ! repeatively print = with the length of sep
                 write(*, '(a)') repeat('=', len_trim(sep))
             endif
 
             if (show_minSavingPolicy) then
-                write(*, '(I4, 3(ES20.6))') iter, dist, minval(sol%btilde), maxval(sol%btilde)
+                write(*, '(I4, 5(ES20.6))') iter, dist, minval(sol%btilde), maxval(sol%btilde), &
+                    minval(arraybkbounds(1, :)), maxval(arraybkbounds(2, :))
             endif
 
         enddo
@@ -308,7 +297,6 @@ contains
             ! conditional expectation !
             ! ----------------------- !
 
-            ! !$omp parallel do collapse(3) private(inde, indk, indbk)
             do inde = 1, enum, 1
                 do indk = 1, knum, 1
                     do indbk = 1, bknum, 1
@@ -323,7 +311,8 @@ contains
             ! solve efficient unit of capital !
             ! ------------------------------- !
 
-            ! !$omp parallel do private(inde, epsval, conf, ewdnstar, kwdnstar, ewupstar, kwupstar)
+            ! !$omp parallel do private(inde, epsval, conf, ewdnstar, kwdnstar, ewupstar, kwupstar), &
+            ! !$omp& private(indk, kval, kstay, nval, yval, wstar, kstar, isKUp, indbk, bval)
             do inde = 1, enum, 1
                 epsval = egrid(inde)
                 conf%ewk = ew(bkidx0, :, inde)*bkw0 + ew(bkidx0+1_ik, :, inde)*(1.0_rk - bkw0)
@@ -355,7 +344,8 @@ contains
 
             distw = maxval(dabs(sol%w - tw))
             distgwk = maxval(dabs(sol%gwk - tgwk))
-            dist = dmax1(distw, distgwk)
+            ! dist = dmax1(distw, distgwk)
+            dist = distw
 
             sol%w = tw
             sol%gwk = tgwk

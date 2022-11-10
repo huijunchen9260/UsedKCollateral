@@ -48,7 +48,6 @@ contains
         kdnmax = ( conf%qbval*bprimemax + conf%xdval ) / conf%qsell
         call kvdn(bvdnval, kvdnval, evdnval, conf, kstay, kdnmax)
 
-
         if (bval > bthreshold) then
             kvfval = kvdnval
             bvfval = bvdnval

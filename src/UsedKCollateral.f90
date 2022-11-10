@@ -6,6 +6,7 @@ module UsedKCollateral
     use parameters
     use firmValueIter
     use firmDistribution
+    use economybisection
     implicit none
 
 contains
@@ -24,26 +25,6 @@ contains
         open (newunit=iunit, file=resDir // "sol%gwk.bin", &
           form="unformatted", access="stream", status="old")
         read (iunit) sol%gwk
-        close (iunit)
-
-        open (newunit=iunit, file=resDir // "sol%kwupvec.bin", &
-          form="unformatted", access="stream", status="old")
-        read (iunit) sol%kwupvec
-        close (iunit)
-
-        open (newunit=iunit, file=resDir // "sol%kwdnvec.bin", &
-          form="unformatted", access="stream", status="old")
-        read (iunit) sol%kwdnvec
-        close (iunit)
-
-        open (newunit=iunit, file=resDir // "sol%ewdnvec.bin", &
-          form="unformatted", access="stream", status="old")
-        read (iunit) sol%ewdnvec
-        close (iunit)
-
-        open (newunit=iunit, file=resDir // "sol%ewupvec.bin", &
-          form="unformatted", access="stream", status="old")
-        read (iunit) sol%ewupvec
         close (iunit)
 
         open (newunit=iunit, file=resDir // "sol%btilde.bin", &
@@ -74,6 +55,11 @@ contains
         open (newunit=iunit, file=resDir // "sol%gvb.bin", &
           form="unformatted", access="stream", status="old")
         read (iunit) sol%gvb
+        close (iunit)
+
+        open (newunit=iunit, file=resDir // "sol%gvbk.bin", &
+          form="unformatted", access="stream", status="old")
+        read (iunit) sol%gvbk
         close (iunit)
 
         open (newunit=iunit, file=resDir // "sol%muw.bin", &
@@ -184,6 +170,11 @@ contains
         open (newunit=iunit, file=resDir // "sol%gvb.bin", &
           form="unformatted", access="stream", status="unknown")
         write (iunit) sol%gvb
+        close (iunit)
+
+        open (newunit=iunit, file=resDir // "sol%gvbk.bin", &
+          form="unformatted", access="stream", status="unknown")
+        write (iunit) sol%gvbk
         close (iunit)
 
         open (newunit=iunit, file=resDir // "sol%muw.bin", &

@@ -73,7 +73,7 @@ contains
         ! default !
         ! ------- !
         iter = 0_ik
-        gssTol = 1D-9
+        gssTol = 1D-12
         gssMaxIter = 500_ik
         isFindMax = .true.
         isShow = .false.
@@ -91,7 +91,7 @@ contains
         a = LB
         b = UB
         c = a + goldenRatio*(b-a);
-        d = a + (1-goldenRatio)*(b-a);
+        d = a + (1.0_rk-goldenRatio)*(b-a);
 
         fval = Obj(c, func_data); fc = merge(-fval, fval, isFindMax);
         fval = Obj(d, func_data); fd = merge(-fval, fval, isFindMax);

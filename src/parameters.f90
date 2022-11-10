@@ -14,10 +14,17 @@ module parameters
     character(len=*), parameter :: figPyDir = "./pyfile/"
     character(len=1000) :: sep
     character(len=1), parameter :: tab = char(9)
-    logical, parameter :: show_wvalueiter = .true.
-    logical, parameter :: show_minSavingPolicy = .true.
+
+    ! logical, parameter :: show_wvalueiter = .true.
+    ! logical, parameter :: show_minSavingPolicy = .true.
     logical, parameter :: show_vvalueiter = .true.
     logical, parameter :: show_steadyStateDistribution = .true.
+
+    logical, parameter :: show_wvalueiter = .false.
+    logical, parameter :: show_minSavingPolicy = .false.
+    ! logical, parameter :: show_vvalueiter = .false.
+    ! logical, parameter :: show_steadyStateDistribution = .false.
+
     ! logical, parameter :: saveLog = .true.
     ! integer(ik) :: logunit = 20
     ! character(len=*), parameter :: logfile = "./log.txt"
@@ -31,22 +38,25 @@ module parameters
     ! Tolerance !
     ! --------- !
     real(rk), parameter :: tol = 1.0D-9           ! D is e in matlab, double precision
-    real(rk), parameter :: wTol = 1.0D-7
-    real(rk), parameter :: vTol = 1.0D-7
-    real(rk), parameter :: minBTol = 1.0D-7
-    real(rk), parameter :: ssDistTol = 1.0D-7
-    integer(ik), parameter :: maxwiter = 1000_ik
-    integer(ik), parameter :: maxviter = 200_ik
-    integer(ik), parameter :: maxbtildeiter = 1000_ik
+    real(rk), parameter :: wTol = 1.0D-8
+    real(rk), parameter :: vTol = 1.0D-5
+    real(rk), parameter :: minBTol = 1.0D-8
+    real(rk), parameter :: ssDistTol = 1.0D-5
+    real(rk), parameter :: bisectTol = 1.0D-5
+    integer(ik), parameter :: maxwiter = 300_ik
+    integer(ik), parameter :: maxviter = 50_ik
+    integer(ik), parameter :: maxbtildeiter = 300_ik
+    integer(ik), parameter :: maxssDistiter = 200_ik
+    integer(ik), parameter :: maxbisectiter = 50_ik
 
     ! ----------- !
     ! grid points !
     ! ----------- !
-    integer(ik), parameter :: knum = 350_ik
-    integer(ik), parameter :: bknum = 350_ik
+    integer(ik), parameter :: knum = 500
+    integer(ik), parameter :: bknum = 500
     integer(ik), parameter :: enum = 7_ik
-    integer(ik), parameter :: muknum = 600
-    integer(ik), parameter :: mubknum = 400_ik
+    integer(ik), parameter :: muknum = 1000
+    integer(ik), parameter :: mubknum = 1000
 
     ! ---------- !
     ! parameters !
@@ -69,14 +79,15 @@ module parameters
     real(rk), parameter :: chi = 0.1_rk           ! new firm capital size over average incumbent
     real(rk), parameter :: omegasw = 0.291_rk     ! no-constraint firm ratio
 
-    ! golden ratio
-    real(rk), parameter :: rg = (3.0_rk - dsqrt(5.0_rk)) / 2.0_rk
+    real(rk), parameter :: qsell0 = 0.918790087890625_rk
+    real(rk), parameter :: wval0 = 1.087975585937500_rk
 
     ! ------ !
     ! arrays !
     ! ------ !
-    real(rk), dimension(2) :: kbounds = (/0.05_rk, 6.0_rk/)
-    real(rk), dimension(2) :: bkbounds = (/-25.0_rk, zeta/)
+    real(rk), dimension(2) :: kbounds = [ 0.05_rk, 6.0_rk ]
+    real(rk), dimension(2) :: bkbounds = [ -25.0_rk, zeta ]
+    real(rk), dimension(2) :: pbounds = [ 0.9_rk, 1.2_rk ]
     real(rk), dimension(knum) :: kgrid
     real(rk), dimension(enum) :: egrid
     real(rk), dimension(bknum) :: bkgrid
@@ -96,7 +107,7 @@ module parameters
         real(rk), dimension(:, :), allocatable :: btilde, gwb
         logical, dimension(:, :, :), allocatable :: wtrue
         ! vvalueiter
-        real(rk), dimension(:, :, :), allocatable :: v, gvk, gvb
+        real(rk), dimension(:, :, :), allocatable :: v, gvk, gvb, gvbk
         ! steadyStateDistribution
         real(rk), dimension(:, :), allocatable :: muw
         real(rk), dimension(:, :, :), allocatable :: muv
@@ -180,6 +191,7 @@ contains
         if (allocated(sol%v)) deallocate(sol%v)
         if (allocated(sol%gvk)) deallocate(sol%gvk)
         if (allocated(sol%gvb)) deallocate(sol%gvb)
+        if (allocated(sol%gvbk)) deallocate(sol%gvbk)
         ! aggregateDynamic
         if (allocated(sol%muw)) deallocate(sol%muw)
         if (allocated(sol%muv)) deallocate(sol%muv)
@@ -200,6 +212,7 @@ contains
         allocate(sol%v(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvk(bknum, knum, enum), source=0.0_rk)
         allocate(sol%gvb(bknum, knum, enum), source=0.0_rk)
+        allocate(sol%gvbk(bknum, knum, enum), source=0.0_rk)
         ! aggregateDynamic
         allocate(sol%muw(muknum, enum), source=0.0_rk)
         allocate(sol%muv(mubknum, muknum, enum), source=0.0_rk)
