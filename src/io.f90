@@ -102,11 +102,12 @@ contains
         enddo
     end subroutine pprint_3d_logical
 
-    subroutine pprint_3d_real64(mat, one_begin, one_end, two_begin, two_end, three_begin, three_end)
+    subroutine pprint_3d_real64(mat, one_begin, one_end, two_begin, two_end, three_begin, three_end, fmt)
         real(real64), intent(in) :: mat(:, :, :)
         integer(int32), optional :: one_begin, one_end, two_begin, two_end, three_begin, three_end
+        character(len=*), optional :: fmt
         integer(int32) :: res(3), i, one_b, one_e, two_b, two_e, three_b, three_e
-        character(len=30) :: f, str
+        character(len=30) :: ffmt, f, str
 
         res = shape(mat)
         one_b = 1; if (present(one_begin)) one_b = one_begin
@@ -115,10 +116,11 @@ contains
         two_e = res(2); if (present(two_end)) two_e = two_end
         three_b = 1; if (present(three_begin)) three_b = three_begin
         three_e = res(3); if (present(one_begin)) three_e = three_end
+        ffmt = 'E13.5'; if (present(fmt)) ffmt = fmt
 
         do i = three_b, three_e, 1
             write(*, '((a, i1, a))') '[:, :, ', i, '] = '
-            call pprint_2d_real64(mat(:, :, i), one_b, one_e, two_b, two_e)
+            call pprint_2d_real64(mat(:, :, i), one_b, one_e, two_b, two_e, ffmt)
             write(*, *) ''
         enddo
     end subroutine pprint_3d_real64
@@ -184,20 +186,22 @@ contains
         enddo
     end subroutine pprint_2d_logical
 
-    subroutine pprint_2d_real64(mat, rowbegin, rowend, colbegin, colend)
+    subroutine pprint_2d_real64(mat, rowbegin, rowend, colbegin, colend, fmt)
         real(real64), intent(in) :: mat(:, :)
         integer(int32), optional :: rowbegin, rowend, colbegin, colend
+        character(len=*), optional :: fmt
         integer(int32) :: res(2), i, j, rb, re, cb, ce
-        character(len=30) :: f, str(2)
+        character(len=30) :: ffmt, f, str(2)
         res = shape(mat)
 
         rb = 1; if (present(rowbegin)) rb = rowbegin
         re = res(1); if (present(rowend)) re = rowend
         cb = 1; if (present(colbegin)) cb = colbegin
         ce = res(2); if (present(colend)) ce = colend
+        ffmt = 'E13.5'; if (present(fmt)) ffmt = fmt
 
         write(unit=str, fmt='(I0)') res
-        f = trim('(' // trim(str(2)) // 'E13.5)')
+        f = trim('(' // trim(str(2)) // trim(ffmt) // ')')
         do i = rb, re, 1
             write(*, f) ( mat(i,j), j = cb, ce, 1 )
         enddo
@@ -245,18 +249,21 @@ contains
         enddo
     end subroutine pprint_2d_int64
 
-    subroutine pprint_1d_real64(mat, rowbegin, rowend)
+    subroutine pprint_1d_real64(mat, rowbegin, rowend, fmt)
         real(real64), intent(in) :: mat(:)
         integer(int32), optional :: rowbegin, rowend
+        character(len=*), optional :: fmt
         integer(int32) :: res, i, rb, re
-        character(len=30) :: f, s, str
+        character(len=30) :: ffmt, f, s, str
 
         res = size(mat)
         rb = 1; if (present(rowbegin)) rb = rowbegin
         re = res; if (present(rowend)) re = rowend
+        ffmt = 'E13.5'; if (present(fmt)) ffmt = fmt
+
 
         write(unit=str, fmt='(I0)') res
-        f = trim('(' // trim(str) // 'E13.5)')
+        f = trim('(' // trim(str) // trim(ffmt) // ')')
         do i = rb, re, 1
             write(*, f) ( mat(i) )
         enddo

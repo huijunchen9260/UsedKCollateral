@@ -1,0 +1,238 @@
+[  0%]                 parameters.f90
+[  8%]                 parameters.f90  done.
+[  8%]                     optMod.f90
+[ 16%]                     optMod.f90  done.
+[ 16%]              firmValueIter.f90
+[ 25%]              firmValueIter.f90  done.
+[ 25%]                    distMod.f90
+[ 33%]                    distMod.f90  done.
+[ 33%]           firmDistribution.f90
+[ 41%]           firmDistribution.f90  done.
+[ 41%]           calibrationStats.f90
+[ 50%]           calibrationStats.f90  done.
+[ 50%]           economybisection.f90
+[ 58%]           economybisection.f90  done.
+[ 58%]        lifeCycleSimulation.f90
+[ 66%]        lifeCycleSimulation.f90  done.
+[ 66%]            UsedKCollateral.f90
+[ 75%]            UsedKCollateral.f90  done.
+[ 75%]           libUsedKCollateral.a
+[ 83%]           libUsedKCollateral.a  done.
+[ 83%]                       main.f90
+[ 91%]                       main.f90  done.
+[ 91%]                UsedKCollateral
+[100%]                UsedKCollateral  done.
+[100%] Project compiled successfully.
+ Start!
+
+ Run KT13 Replication
+
+
+****************************************
+Bisection initization at wlow:    1.0400
+****************************************
+
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+****************************************
+Bisection initization at wlow:    1.1000
+****************************************
+
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+***********************************
+Bisection iter 1 at wage:    1.0700
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 1
+	q =  0.954000, Q =  1.000000, w =  1.070000
+	w - psi*cagg =  0.147393
+
+***********************************
+Bisection iter 2 at wage:    1.0550
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 2
+	q =  0.954000, Q =  1.000000, w =  1.055000
+	w - psi*cagg =  0.068757
+
+***********************************
+Bisection iter 3 at wage:    1.0475
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 3
+	q =  0.954000, Q =  1.000000, w =  1.047500
+	w - psi*cagg =  0.028891
+
+***********************************
+Bisection iter 4 at wage:    1.0438
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 4
+	q =  0.954000, Q =  1.000000, w =  1.043750
+	w - psi*cagg =  0.005406
+
+***********************************
+Bisection iter 5 at wage:    1.0419
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 5
+	q =  0.954000, Q =  1.000000, w =  1.041875
+	w - psi*cagg = -0.004354
+
+***********************************
+Bisection iter 6 at wage:    1.0428
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 6
+	q =  0.954000, Q =  1.000000, w =  1.042813
+	w - psi*cagg =  0.000682
+
+***********************************
+Bisection iter 7 at wage:    1.0423
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 7
+	q =  0.954000, Q =  1.000000, w =  1.042344
+	w - psi*cagg = -0.002022
+
+***********************************
+Bisection iter 8 at wage:    1.0426
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 8
+	q =  0.954000, Q =  1.000000, w =  1.042578
+	w - psi*cagg = -0.000450
+
+***********************************
+Bisection iter 9 at wage:    1.0427
+***********************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 9
+	q =  0.954000, Q =  1.000000, w =  1.042695
+	w - psi*cagg =  0.000214
+
+************************************
+Bisection iter 10 at wage:    1.0426
+************************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 10
+	q =  0.954000, Q =  1.000000, w =  1.042637
+	w - psi*cagg =  0.000024
+
+************************************
+Bisection iter 11 at wage:    1.0426
+************************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 11
+	q =  0.954000, Q =  1.000000, w =  1.042607
+	w - psi*cagg = -0.000308
+
+************************************
+Bisection iter 12 at wage:    1.0426
+************************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 12
+	q =  0.954000, Q =  1.000000, w =  1.042622
+	w - psi*cagg = -0.000018
+
+************************************
+Bisection iter 13 at wage:    1.0426
+************************************
+ value function iteration: W-type (unconstrained)
+ minimum saving policy for unconstrained firm (W-type)
+ value function iteration: V-type (constrained)
+ stationary distribution on both W-type and V-type firm
+initial: sum(muw) =    0.000000E+00, sum(muv) =    1.000000E+00, total =    1.000000E+00
+
+Bisection: iter = 13
+	q =  0.954000, Q =  1.000000, w =  1.042629
+	w - psi*cagg =  0.000003
+
+Calibration target:
+    K irreversibility (q/Q) =         0.9540000000
+                                             model         data target
+======================================================================
+                        K/Y =         2.3258192986        2.3900000000
+                        I/K =         0.1631019773        0.1000000000
+                     Inew/K =         0.1075333169        0.0690000000
+         reallocation share =         0.1621818837        0.2800000000
+           average std(i/k) =         0.3132452245        0.3370000000
+           average rho(i/k) =         0.0695546782        0.0580000000
+            lumpy inv > 20% =         0.1957670588        0.1860000000
+
+Untargeted moment:
+                                             model         data target
+======================================================================
+              average (i/k) =         0.1055950638        0.1220000000
+        inaction (i/k < 1%) =         0.5426517647        0.0810000000
+               lumpy disinv =         0.1421882353        0.1040000000
+         lumpy disinv > 20% =         0.0645976471        0.0180000000
+ elapsed time:    74.616990000000001       seconds.

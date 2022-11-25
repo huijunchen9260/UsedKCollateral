@@ -1,0 +1,21 @@
+[  0%]                 parameters.f90
+[  9%]                 parameters.f90  done.
+[  9%]                     optMod.f90
+[ 18%]                     optMod.f90  done.
+[ 18%]              firmValueIter.f90
+[ 27%]              firmValueIter.f90  done.
+[ 27%]                    distMod.f90
+[ 36%]                    distMod.f90  done.
+[ 36%]           firmDistribution.f90
+[ 45%]           firmDistribution.f90  done.
+[ 45%]           calibrationStats.f90
+[ 54%]           calibrationStats.f90  done.
+[ 54%]           economybisection.f90
+[ 63%]           economybisection.f90  done.
+[ 63%]            UsedKCollateral.f90
+[ 72%]            UsedKCollateral.f90  done.
+[ 72%]           libUsedKCollateral.a
+[ 81%]           libUsedKCollateral.a  done.
+[ 81%]                       main.f90
+[ 90%]                       main.f90  done.
+[ 90%]                UsedKCollateral

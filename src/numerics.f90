@@ -132,69 +132,137 @@ end subroutine tauchen
 
 ! From KT13 code
 ! rho is the persistence of the continuous process
-! sigmas is the standard deviation of innovations (epsilon)
+! sigmas is the standard deviation of innovations
 ! n is the number of states in the discretisation
 ! z is the discretised support
 ! pi is the transition matrix for the Markov Chain
 
 ! Rouwenhorst (1995) 'Asset Pricing Implications of Equilibrium Business Cycle Models,'
 ! Cooley (ed), Frontiers of Business Cycle Research. Princeton, 294-330.
+
 subroutine rouwenhorst(rho, sigmas, n, z, pi)
-    integer(ik), intent(in):: n
-    integer(ik) :: i
-    real(rk):: p, q, zvar, epsilon, y(n-2_ik)
-    real(rk), intent(in):: rho, sigmas
-    real(rk), intent(out):: z(n), pi(n,n)
-    real(rk), dimension(:,:), allocatable:: hlag, h
 
-    ! retrieve p and q
-    p = (rho + 1.0_rk)/2.0_rk
-    q = p
 
-    allocate(hlag(1,1))
+integer(ik), intent(in):: n
+integer(ik)::i
+real(rk):: p, q, zvar, epsilon, y(n)
+real(rk), intent(in):: rho, sigmas
+real(rk), intent(out):: z(n), pi(n,n)
+real(rk), dimension(:,:), allocatable:: hlag, h
 
-    hlag(1,1) = 1.0_rk
+! retrieve p and q
+p = (rho + 1.0_rk)/2.0_rk
+q = p
 
-    do i = 2,n
+allocate(hlag(1,1))
 
-        allocate (h(i,i))
+hlag(1,1) = 1.0_rk
 
-        h = 0.0_rk
-        h(1:i-1,1:i-1) = p*hlag
-        h(1:i-1,2:i) = h(1:i-1,2:i) + (1.0_rk-p)*hlag
-        h(2:i,1:i-1) = h(2:i,1:i-1) + (1.0_rk-q)*hlag
-        h(2:i,2:i) = h(2:i,2:i) + q*hlag
+do i = 2,n
 
-        h(2:i-1,:) = h(2:i-1,:)/2.0_rk
+	allocate (h(i,i))
 
-        deallocate(hlag)
+	h = 0.0_rk
+	h(1:i-1,1:i-1) = p*hlag
+	h(1:i-1,2:i) = h(1:i-1,2:i) + (1.0_rk-p)*hlag
+	h(2:i,1:i-1) = h(2:i,1:i-1) + (1.0_rk-q)*hlag
+	h(2:i,2:i) = h(2:i,2:i) + q*hlag
 
-        allocate(hlag(i,i))
+	h(2:i-1,:) = h(2:i-1,:)/2.0_rk
 
-        hlag = h
+	deallocate(hlag)
 
-        deallocate(h)
+	allocate(hlag(i,i))
 
-    end do
+	hlag = h
 
-    pi = hlag
+	deallocate(h)
 
-    deallocate(hlag)
+end do
 
-    zvar = (sigmas**2.0_rk)/(1.0_rk - rho**2.0_rk)
-    epsilon = sqrt((n-1.0_rk)*zvar)
+pi = hlag
 
-    do i = 1_ik, n - 2_ik
-        y(i) = dble(i)
-    end do
+deallocate(hlag)
 
-    y = ((2.0_rk*epsilon)/dble(n-1_ik))*y - epsilon
+zvar = (sigmas**2.0_rk)/(1.0_rk - rho**2.0_rk)
+epsilon = sqrt((n-1.0_rk)*zvar)
 
-    z(1_ik) = -1.0_rk*epsilon
-    z(2_ik:n-1_ik) = y
-    z(n) = epsilon
+do i = 1_ik, n - 2_ik
+	y(i) = dble(i)
+end do
+
+y = ((2.0_rk*epsilon)/dble(n-1_ik))*y - epsilon
+
+z(1_ik) = -1.0_rk*epsilon
+z(2_ik:n-1_ik) = y
+z(n) = epsilon
 
 end subroutine rouwenhorst
+
+! ! rho is the persistence of the continuous process
+! ! sigmas is the standard deviation of innovations (epsilon)
+! ! n is the number of states in the discretisation
+! ! z is the discretised support
+! ! pi is the transition matrix for the Markov Chain
+
+! ! Rouwenhorst (1995) 'Asset Pricing Implications of Equilibrium Business Cycle Models,'
+! ! Cooley (ed), Frontiers of Business Cycle Research. Princeton, 294-330.
+! subroutine rouwenhorst(rho, sigmas, n, z, pi)
+!     integer(ik), intent(in):: n
+!     integer(ik) :: i
+!     real(rk):: p, q, zvar, epsilon, y(n-2_ik)
+!     real(rk), intent(in):: rho, sigmas
+!     real(rk), intent(out):: z(n), pi(n,n)
+!     real(rk), dimension(:,:), allocatable:: hlag, h
+
+!     ! retrieve p and q
+!     p = (rho + 1.0_rk)/2.0_rk
+!     q = p
+
+!     allocate(hlag(1,1))
+
+!     hlag(1,1) = 1.0_rk
+
+!     do i = 2,n
+
+!         allocate (h(i,i))
+
+!         h = 0.0_rk
+!         h(1:i-1,1:i-1) = p*hlag
+!         h(1:i-1,2:i) = h(1:i-1,2:i) + (1.0_rk-p)*hlag
+!         h(2:i,1:i-1) = h(2:i,1:i-1) + (1.0_rk-q)*hlag
+!         h(2:i,2:i) = h(2:i,2:i) + q*hlag
+
+!         h(2:i-1,:) = h(2:i-1,:)/2.0_rk
+
+!         deallocate(hlag)
+
+!         allocate(hlag(i,i))
+
+!         hlag = h
+
+!         deallocate(h)
+
+!     end do
+
+!     pi = hlag
+
+!     deallocate(hlag)
+
+!     zvar = (sigmas**2.0_rk)/(1.0_rk - rho**2.0_rk)
+!     epsilon = sqrt((n-1.0_rk)*zvar)
+
+!     do i = 1_ik, n - 2_ik
+!         y(i) = dble(i)
+!     end do
+
+!     y = ((2.0_rk*epsilon)/dble(n-1_ik))*y - epsilon
+
+!     z(1_ik) = -1.0_rk*epsilon
+!     z(2_ik:n-1_ik) = y
+!     z(n) = epsilon
+
+! end subroutine rouwenhorst
 
 ! subroutine linspace(lb, ub, gridnum, x)
 !     ! integer, parameter:: rk = selected_real_kind(15,307), ik = selected_int_kind(9)

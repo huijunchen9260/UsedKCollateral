@@ -5,11 +5,13 @@ program main
 
     integer(ik) :: indbk, indk, inde
     integer(ik) :: istat
+    integer(ik) :: i_jump
     real(rk) :: cc
     real(rk) :: vec(7, 7, 7)
     real(rk) :: time0, time1, time2, time3
     real(rk) :: fout, xout
     real(rk) :: muwmiddle(mubknum, muknum)
+    real(rk) :: gamma_vec(5), rhoe_vec(5), sigmae_vec(5)
 
     real(rk) :: nval, yval, bprimemax, bthreshold, epsval, kval, bval
 
@@ -18,8 +20,6 @@ program main
 
     write(*, *) "Start!"
 
-    call initGrids()
-    call initSol(sol)
     ! call initConf(conf)
 
     conf%zval = zss
@@ -37,54 +37,60 @@ program main
     ! conf%usednewratio = ( ( 1-eta ) / eta ) * ( ( conf%qsell + gamma )**(-s) )
     ! conf%invnewratio = ( eta**(1/s) + (1.0_rk-eta)**(1/s) * ( conf%usednewratio )**((s-1.0_rk)/s) )**(s/(s-1.0_rk))
 
+    ! gamma_vec = linspace(0.020_rk, 0.035_rk, 10)
+    ! rhoe_vec = linspace(0.680_rk, 0.670_rk, 10)
+    ! sigmae_vec = linspace(0.110_rk, 0.120_rk, 10)
 
-    ! call loadResult(sol)
+    ! call cpu_time(time0)
 
-    call cpu_time(time0)
+    ! write(*, *) "calibration for parameters"
+    ! do i_jump = 1, 5, 1
 
-    ! call TwoDimBisection(conf)
+    !     write(*, '(a, (a10, F20.10))') "Test combination: ", &
+    !         "gamma = ", gamma_vec(i_jump), &
+    !         "rho_e = " , rhoe_vec(i_jump), &
+    !         "sigma_e = ", sigmae_vec(i_jump)
 
-    call OneDimBisection(sol, conf)
+    !     gamma = gamma_vec(i_jump)
+    !     rho_e = rhoe_vec(i_jump)
+    !     sigma_e = sigmae_vec(i_jump)
 
-    ! call wvalueiter(sol, conf)
-    ! call minSavingPolicy(sol, conf)
-    ! call vvalueiter(sol, conf)
-    ! call steadyStateDistribution(sol, conf)
+    !     call initGrids()
+    !     call initSol(sol)
+    !     call TwoDimBisection(conf)
+    !       call firmSimulation(sol, conf)
+    !     call calistats(sol, conf)
 
-
-    ! cc = 0.0_rk
-    ! do inde = 1, enum, 1
-    !     epsval = egrid(inde)
-    !     do indk = 1, knum, 1
-    !         kval = kgrid(indk)
-    !         call debtThreshold(nval, yval, bprimemax, bthreshold, kval, epsval, conf)
-    !         do indbk = 1, bknum, 1
-    !             bval = kval*bkgrid(indbk)
-    !             if (sol%gvb(indbk, indk, inde) / kval > bkbounds(2)) then
-    !                 ! conf%xuval = yval - conf%wval*nval - bval + conf%Qbuy*(1.0_rk-delta)*kval
-    !                 ! conf%xdval = yval - conf%wval*nval - bval + conf%qsell*(1.0_rk-delta)*kval
-    !                 write(*, '(3(a, F9.6), a, 2(F12.6))') "over zeta at b' = ", sol%gvb(indbk, indk, inde), &
-    !                     ", k = ", kval, &
-    !                     ", b/k = ", sol%gvb(indbk, indk, inde) / kval, &
-    !                     ", with cash = ", conf%xuval, conf%xdval
-
-    !                 cc = cc + 1
-    !             endif
-    !             if (sol%gvb(indbk, indk, inde) / kval > bkbounds(2) .and. sol%wtrue(indbk, indk, inde)) then
-    !                 write(*, *) "Also is w type"
-    !             endif
-    !         enddo
-    !     enddo
     ! enddo
-    ! write(*, *) cc
 
-    ! write(*, *) 1 - count(sol%wtrue) / (dble(bknum*knum*enum))
+    ! call initGrids()
+    ! call initSol(sol)
+    ! call TwoDimBisection(conf)
+    ! call calistats(sol, conf)
 
+    ! call initGrids()
+    ! call initSol(sol)
+    ! call NelderMeadSimplex(sol, conf)
+    ! call calistats(sol, conf)
+
+
+    ! call initGrids()
+    ! call initSol(sol)
+    ! call OneDimBisection(sol, conf)
+
+    ! call initGrids()
+    ! call initSol(sol)
+    ! call loadResult(sol, conf)
+
+    call initGrids()
+    call initSol(sol)
+    call TwoDimBisection(conf)
+
+    call firmSimulation(sol, conf)
+    call saveResult(sol, conf)
 
     call cpu_time(time1)
 
     write(*, *) 'elapsed time: ', time1 - time0, ' seconds.'
-
-    call saveResult(sol)
 
 end program main

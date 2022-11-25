@@ -14,7 +14,6 @@ contains
         type(configurations), intent(inout) :: conf
         integer(ik) :: iter
         integer(ik) :: indk, inde, indef, indbk
-        integer(ik) :: bkidx0
         integer(ik) :: choiceik
         real(rk) :: dist, distv, distgvk, distgvb
         real(rk) :: kwdnstar, ewdnstar, kwupstar, ewupstar
@@ -22,7 +21,6 @@ contains
         real(rk) :: epsval, kval, bkval, bval, nval, yval
         real(rk) :: kvfval, bvfval, vval
         real(rk) :: bprimemax, bthreshold
-        real(rk) :: bkw0
         real(rk), dimension(:, :, :), allocatable :: ew, ev, tv, tgvk, tgvb, tgvbk
         logical :: isKUp
 
@@ -49,9 +47,6 @@ contains
 
         write(*, *) "value function iteration: V-type (constrained)"
 
-
-        bkidx0 = gridlookup(bkgrid, bknum, 0.0_rk)
-        bkw0 = gridweight(bkgrid, bknum, 0.0_rk, bkidx0)
 
         mainwhile: do while (dist > vTol .and. iter <= maxviter )
 
@@ -267,14 +262,12 @@ contains
         type(configurations), intent(inout) :: conf
         integer(ik) :: indk, inde, indef, indbk
         integer(ik) :: iter
-        integer(ik) :: bkidx0
 
         real(rk), dimension(:, :, :), allocatable :: tw, ew
         real(rk), dimension(:, :), allocatable :: tgwk
         real(rk) :: dist, distw, distgwk
         real(rk) :: kwdnstar, ewdnstar, kwupstar, ewupstar, kstar, wstar, kstay
         real(rk) :: epsval, kval, bkval, bval, nval, yval
-        real(rk) :: bkw0
 
         logical :: isKUp
 
@@ -287,8 +280,6 @@ contains
         iter = 0_ik
         dist = 2.0_rk*wTol
 
-        bkidx0 = gridlookup(bkgrid, bknum, 0.0_rk)
-        bkw0 = gridweight(bkgrid, bknum, 0.0_rk, bkidx0)
         do while (dist > wTol .AND. iter <= maxwiter)
 
             iter = iter + 1

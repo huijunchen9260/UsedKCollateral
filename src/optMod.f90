@@ -350,7 +350,7 @@ contains
 
         nval = ( ( nu * conf%zval * epsval * kval**alpha ) / conf%wval )**(1/(1-nu))
         yval = conf%zval * epsval * kval**alpha * nval**nu
-        bprimemax = zeta*kval
+        bprimemax = conf%qsell*zeta*kval
         bthreshold = yval - conf%wval*nval + conf%qbval*bprimemax
 
     end subroutine debtThreshold
